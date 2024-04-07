@@ -5,6 +5,6 @@ export class UserController {
 
     @Get("")
     async getUser(): Promise<any> {
-        return "Zd user"
+        return "Zd user es sul sxvaaaaaaaaaaaaa"
     }
 }
