@@ -28,5 +28,3 @@ jobs:
     - run: |
         touch .env
         echo "${{ secrets.DEV_ENV }}" > .env
-    - run: npm run build
-    - run: pm2 restart BackendAPI
