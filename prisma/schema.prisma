@@ -13,22 +13,85 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    String     @default(uuid()) @id
-  email String  @unique
-  name  String?
-  posts Post[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+model Category {
+    id Int @id @default(autoincrement())
+
+    name_en String? @unique
+    name_ge String? @unique
+    name_tr String? @unique
+
+    parentCategoryId Int?
+    parentCategory Category? @relation("childCategories", fields: [parentCategoryId], references: [id], onDelete: Cascade)
+
+    childCategories Category[] @relation("childCategories")
+
+    parentMostCategoryId Int?
+    parentMostCategory Category? @relation("parentMostCategory", fields: [parentMostCategoryId], references: [id], onDelete: Cascade)
+
+    parentMostChildCategories Category[] @relation("parentMostCategory")
+
+    products Product[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
 }
 
-model Post {
-  id        String     @default(uuid()) @id
-  title     String
-  content   String?
-  published Boolean? @default(false)
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Product {
+    id Int @id @default(autoincrement())
+
+    name_en String? @unique
+    name_ge String? @unique
+    name_tr String? @unique
+
+    categoryId Int
+    category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+    specifications Specification []
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
+model Specification {
+    id Int @id @default(autoincrement())
+    name_en String? @unique
+    name_ge String? @unique
+    name_tr String? @unique
+
+    values String[]
+
+    productId Int
+    product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+    unitsOnSpecifications UnitOnSpecification[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
+model UnitOnSpecification {
+    unit   Unit @relation(fields: [unitId], references: [id])
+    unitId Int
+
+    specification   Specification @relation(fields: [specificationId], references: [id])
+    specificationId Int
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+
+    @@id([specificationId, unitId])
+}
+
+
+model Unit {
+    id Int @id @default(autoincrement())
+    name_en String? @unique
+    name_ge String? @unique
+    name_tr String? @unique
+
+    unitsOnSpecifications UnitOnSpecification[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
 }
