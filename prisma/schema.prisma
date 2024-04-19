@@ -21,6 +21,9 @@ model Category {
     name_ge String? @unique
     name_tr String? @unique
 
+    depth Int?
+    maxDepth Int?
+
     parentCategoryId Int?
     parentCategory Category? @relation("childCategories", fields: [parentCategoryId], references: [id], onDelete: Cascade)
 

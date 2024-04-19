@@ -5,14 +5,16 @@ import {
   CategoryCreateInput,
   CategoryUpdateInput,
 } from '../models/category.models';
+import { includeChildrenRecursive } from '../prisma-helpers/category-prisma-helpers';
 import { ApiError } from '../../core/api-errors/api-error';
 
 @Injectable()
 export class CategoryService {
   private readonly prisma: PrismaService;
 
-  constructor(private prismaClient: PrismaClientService) {
-    this.prisma = prismaClient.getClient();
+  constructor(private prismaClient: PrismaService) {
+    this.prisma = prismaClient;
+    //this.prisma = prismaClient.getClient();
   }
 
   async getAllParentCategory() {
@@ -21,14 +23,14 @@ export class CategoryService {
 
   async getAllCategoryWithChildren() {
     return await this.prisma.category.findMany({
-      include: includeChildrenRecursive(),
+      include: includeChildrenRecursive(0),
     });
   }
 
-  async getParentCategoryWithChildren(categoryId: number) {
+  async getParentCategoryWithChildren(categoryId: number, depth: number) {
     const category = await this.prisma.category.findUnique({
       where: { id: categoryId },
-      include: includeChildrenRecursive(),
+      include: includeChildrenRecursive(depth || 0),
     });
 
     return category;
@@ -40,12 +42,16 @@ export class CategoryService {
         name_en: input.name_en,
         name_ge: input.name_ge,
         name_tr: input.name_tr,
+        depth: input.depth,
         parentCategoryId: input.parentCategoryId,
         parentMostCategoryId: input.parentMostCategoryId,
       },
     });
 
-    return await this.getParentCategoryWithChildren(input.parentMostCategoryId);
+    return await this.getParentCategoryWithChildren(
+      input.parentMostCategoryId,
+      input.depth,
+    );
   }
 
   async updateSingleCategory(input: CategoryUpdateInput, categoryId: number) {
@@ -67,10 +73,14 @@ export class CategoryService {
         name_en: input.name_en,
         name_ge: input.name_ge,
         name_tr: input.name_tr,
+        depth: input.depth,
       },
     });
 
-    return await this.getParentCategoryWithChildren(category.parentMostCategoryId);
+    return await this.getParentCategoryWithChildren(
+      category.parentMostCategoryId,
+      input.depth,
+    );
   }
 
   async deleteCategory(categoryId: number) {
@@ -92,6 +102,7 @@ export class CategoryService {
 
     return await this.getParentCategoryWithChildren(
       catagory.parentMostCategoryId,
+      catagory.depth,
     );
   }
 }
