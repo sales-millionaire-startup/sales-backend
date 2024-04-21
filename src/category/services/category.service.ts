@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { PrismaClientService } from '../../prisma/prisma-client.service';
 import {
   CategoryCreateInput,
   CategoryUpdateInput,
@@ -10,12 +9,7 @@ import { ApiError } from '../../core/api-errors/api-error';
 
 @Injectable()
 export class CategoryService {
-  private readonly prisma: PrismaService;
-
-  constructor(private prismaClient: PrismaService) {
-    this.prisma = prismaClient;
-    //this.prisma = prismaClient.getClient();
-  }
+  constructor(private prisma: PrismaService) {}
 
   async getAllParentCategory() {
     return await this.prisma.category.findMany({

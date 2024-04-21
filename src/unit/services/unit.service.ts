@@ -4,12 +4,7 @@ import { UnitCreateInput, UnitUpdateInput } from '../models/unit.model';
 
 Injectable();
 export class UnitService {
-  private readonly prisma: PrismaService;
-
-  constructor(private prismaClient: PrismaService) {
-    this.prisma = prismaClient;
-    //this.prisma = prismaClient.getClient();
-  }
+  constructor(private prisma: PrismaService) {}
 
   async createSingleUnit(unitCreateInput: UnitCreateInput) {
     return await this.prisma.unit.create({

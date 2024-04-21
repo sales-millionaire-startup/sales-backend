@@ -7,12 +7,7 @@ import {
 
 @Injectable()
 export class ProductService {
-  private readonly prisma: PrismaService;
-
-  constructor(private prismaClient: PrismaService) {
-    this.prisma = prismaClient;
-    //this.prisma = prismaClient.getClient();
-  }
+  constructor(private prisma: PrismaService) {}
 
   async createSingleProduct(productCreateInput: ProductCreateInput) {
     return await this.prisma.$transaction(async (tx) => {

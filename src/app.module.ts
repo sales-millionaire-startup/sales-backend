@@ -5,9 +5,16 @@ import { Module } from '@nestjs/common';
 import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
 import { UnitModule } from './unit/unit.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-  imports: [UserModule, CategoryModule, ProductModule, UnitModule],
+  imports: [
+    UserModule,
+    CategoryModule,
+    ProductModule,
+    UnitModule,
+    PrismaModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
