@@ -22,7 +22,7 @@ model Category {
     name_tr String? @unique
 
     depth Int?
-    maxDepth Int?
+    maxDepth Int? @default(0)
 
     parentCategoryId Int?
     parentCategory Category? @relation("childCategories", fields: [parentCategoryId], references: [id], onDelete: Cascade)
@@ -58,34 +58,21 @@ model Product {
 
 model Specification {
     id Int @id @default(autoincrement())
-    name_en String? @unique
-    name_ge String? @unique
-    name_tr String? @unique
+    name_en String?
+    name_ge String?
+    name_tr String?
 
     values String[]
 
     productId Int
     product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-    unitsOnSpecifications UnitOnSpecification[]
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now())
-}
-
-model UnitOnSpecification {
-    unit   Unit @relation(fields: [unitId], references: [id])
     unitId Int
-
-    specification   Specification @relation(fields: [specificationId], references: [id])
-    specificationId Int
+    unit Unit @relation(fields: [unitId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @default(now())
-
-    @@id([specificationId, unitId])
 }
-
 
 model Unit {
     id Int @id @default(autoincrement())
@@ -93,7 +80,7 @@ model Unit {
     name_ge String? @unique
     name_tr String? @unique
 
-    unitsOnSpecifications UnitOnSpecification[]
+    specifications Specification[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @default(now())

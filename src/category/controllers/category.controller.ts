@@ -6,7 +6,8 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Put, Query,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { CategoryService } from '../services/category.service';
 import {
@@ -19,11 +20,6 @@ export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
   @Get('')
-  async getAllWithChildren(): Promise<any> {
-    return await this.categoryService.getAllCategoryWithChildren();
-  }
-
-  @Get('parents')
   async getAllParents(): Promise<any> {
     return await this.categoryService.getAllParentCategory();
   }
@@ -41,13 +37,13 @@ export class CategoryController {
 
   @Post('')
   async createCategory(
-    @Body() createModuleInput: CategoryCreateInput,
+    @Body() categoryCreateInput: CategoryCreateInput,
   ): Promise<any> {
-    return await this.categoryService.createSingleCategory(createModuleInput);
+    return await this.categoryService.createSingleCategory(categoryCreateInput);
   }
 
   @Put(':categoryId')
-  async updateModule(
+  async updateCategory(
     @Param('categoryId', new ParseIntPipe()) categoryId,
     @Body() categoryUpdateInput: CategoryUpdateInput,
   ): Promise<any> {

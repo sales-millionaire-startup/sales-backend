@@ -3,9 +3,11 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { Module } from '@nestjs/common';
 import { CategoryModule } from './category/category.module';
+import { ProductModule } from './product/product.module';
+import { UnitModule } from './unit/unit.module';
 
 @Module({
-  imports: [UserModule, CategoryModule],
+  imports: [UserModule, CategoryModule, ProductModule, UnitModule],
   controllers: [AppController],
   providers: [AppService],
 })

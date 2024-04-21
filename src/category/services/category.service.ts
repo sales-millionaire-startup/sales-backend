@@ -18,7 +18,11 @@ export class CategoryService {
   }
 
   async getAllParentCategory() {
-    return await this.prisma.category.findMany();
+    return await this.prisma.category.findMany({
+      where: {
+        depth: 0,
+      },
+    });
   }
 
   async getAllCategoryWithChildren() {
@@ -37,7 +41,8 @@ export class CategoryService {
   }
 
   async createSingleCategory(input: CategoryCreateInput) {
-    await this.prisma.category.create({
+    //Creates newCategory
+    const newCategory = await this.prisma.category.create({
       data: {
         name_en: input.name_en,
         name_ge: input.name_ge,
@@ -46,11 +51,31 @@ export class CategoryService {
         parentCategoryId: input.parentCategoryId,
         parentMostCategoryId: input.parentMostCategoryId,
       },
+      include: {
+        parentCategory: true,
+      },
     });
+
+    let maxDepth = newCategory.parentCategory?.maxDepth || 0;
+
+    //Updates parentMostCategory if depth increases
+    if (newCategory.depth > maxDepth) {
+      maxDepth = newCategory.depth;
+
+      return await this.prisma.category.update({
+        where: {
+          id: newCategory.parentMostCategoryId,
+        },
+        data: {
+          maxDepth: maxDepth,
+        },
+        include: includeChildrenRecursive(maxDepth || 0),
+      });
+    }
 
     return await this.getParentCategoryWithChildren(
       input.parentMostCategoryId,
-      input.depth,
+      maxDepth,
     );
   }
 
