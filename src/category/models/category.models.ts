@@ -11,5 +11,4 @@ export interface CategoryUpdateInput {
   name_en?: string;
   name_ge?: string;
   name_tr?: string;
-  depth?: number;
 }

@@ -26,12 +26,10 @@ export class CategoryService {
   }
 
   async getParentCategoryWithChildren(categoryId: number, depth: number) {
-    const category = await this.prisma.category.findUnique({
+    return await this.prisma.category.findUnique({
       where: { id: categoryId },
       include: includeChildrenRecursive(depth || 0),
     });
-
-    return category;
   }
 
   async createSingleCategory(input: CategoryCreateInput) {
@@ -84,7 +82,7 @@ export class CategoryService {
       throw new ApiError(404, 'not_found', 'not_found');
     }
 
-    await this.prisma.category.update({
+    const updatedCategory = await this.prisma.category.update({
       where: {
         id: categoryId,
       },
@@ -92,13 +90,12 @@ export class CategoryService {
         name_en: input.name_en,
         name_ge: input.name_ge,
         name_tr: input.name_tr,
-        depth: input.depth,
       },
     });
 
     return await this.getParentCategoryWithChildren(
       category.parentMostCategoryId,
-      input.depth,
+      updatedCategory.maxDepth,
     );
   }
 
