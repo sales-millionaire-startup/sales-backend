@@ -19,12 +19,6 @@ export class CategoryService {
     });
   }
 
-  async getAllCategoryWithChildren() {
-    return await this.prisma.category.findMany({
-      include: includeChildrenRecursive(0),
-    });
-  }
-
   async getParentCategoryWithChildren(categoryId: number, depth: number) {
     return await this.prisma.category.findUnique({
       where: { id: categoryId },
