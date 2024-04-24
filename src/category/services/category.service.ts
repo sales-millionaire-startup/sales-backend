@@ -43,6 +43,7 @@ export class CategoryService {
     });
 
     let maxDepth = newCategory.parentCategory?.maxDepth || 0;
+    const parentMostCategoryId = input.parentMostCategoryId || newCategory.id;
 
     //Updates parentMostCategory if depth increases
     if (newCategory.depth > maxDepth) {
@@ -60,7 +61,7 @@ export class CategoryService {
     }
 
     return await this.getParentCategoryWithChildren(
-      input.parentMostCategoryId,
+      parentMostCategoryId,
       maxDepth,
     );
   }

@@ -4,6 +4,7 @@ import {
   ProductCreateInput,
   ProductUpdateInput,
 } from '../models/product.models';
+import { includeChildrenRecursive } from '../../category/prisma-helpers/category-prisma-helpers';
 
 @Injectable()
 export class ProductService {
@@ -19,6 +20,13 @@ export class ProductService {
           name_tr: productCreateInput.name_tr,
           categoryId: productCreateInput.categoryId,
         },
+        include: {
+          category: {
+            include: {
+              parentMostCategory: true,
+            },
+          },
+        },
       });
 
       // Create the specifications associated with the new product
@@ -28,8 +36,10 @@ export class ProductService {
           name_ge: spec.name_ge,
           name_tr: spec.name_tr,
           productId: newProduct.id,
-          unitId: spec.unitId,
-          values: spec.values,
+          unitElementId: spec.unitId,
+          values_en: spec.values_en,
+          values_ge: spec.values_ge,
+          values_tr: spec.values_tr,
         }),
       );
 
@@ -37,21 +47,7 @@ export class ProductService {
         data: specificationData,
       });
 
-      // Fetch the complete product object with its related specifications
-      const productWithRelations = await tx.product.findUnique({
-        where: {
-          id: newProduct.id,
-        },
-        include: {
-          specifications: {
-            include: {
-              unit: true,
-            },
-          },
-        },
-      });
-
-      return productWithRelations;
+      return await this.getProductsTree(newProduct);
     });
   }
 
@@ -67,6 +63,13 @@ export class ProductService {
           name_ge: productUpdateInput.name_ge,
           name_tr: productUpdateInput.name_tr,
           categoryId: productUpdateInput.categoryId,
+        },
+        include: {
+          category: {
+            include: {
+              parentMostCategory: true,
+            },
+          },
         },
       });
 
@@ -84,11 +87,13 @@ export class ProductService {
               name_en: spec.name_en,
               name_ge: spec.name_ge,
               name_tr: spec.name_tr,
-              unitId: spec.unitId,
-              values: spec.values,
+              unitElementId: spec.unitId,
+              values_en: spec.values_en,
+              values_ge: spec.values_ge,
+              values_tr: spec.values_tr,
             },
             include: {
-              unit: true, // Include the unit in the updated specification
+              unitElement: true, // Include the unit in the updated specification
             },
           });
           updatedSpecifications.push(updatedSpec);
@@ -100,22 +105,20 @@ export class ProductService {
               name_ge: spec.name_ge,
               name_tr: spec.name_tr,
               productId: productId,
-              unitId: spec.unitId,
-              values: spec.values,
+              unitElementId: spec.unitId,
+              values_en: spec.values_en,
+              values_ge: spec.values_ge,
+              values_tr: spec.values_tr,
             },
             include: {
-              unit: true, // Include the unit in the new specification
+              unitElement: true, // Include the unit in the new specification
             },
           });
           updatedSpecifications.push(newSpec);
         }
       }
 
-      // Return the updated product with its specifications and related units
-      return {
-        ...updatedProduct,
-        specifications: updatedSpecifications,
-      };
+      return await this.getProductsTree(updatedProduct);
     });
   }
 
@@ -127,7 +130,7 @@ export class ProductService {
       include: {
         specifications: {
           include: {
-            unit: true,
+            unitElement: true,
           },
         },
       },
@@ -139,6 +142,15 @@ export class ProductService {
       where: {
         id: productId,
       },
+    });
+  }
+
+  private async getProductsTree(product) {
+    return await this.prisma.category.findUnique({
+      where: { id: product.category.parentCategoryId },
+      include: includeChildrenRecursive(
+        product.category.parentMostCategory.maxDepth || 0,
+      ),
     });
   }
 }

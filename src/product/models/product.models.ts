@@ -21,5 +21,7 @@ export interface SpecificationInput {
   name_tr?: string;
   productId: number;
   unitId: number;
-  values: string[];
+  values_en?: string[];
+  values_ge?: string[];
+  values_tr?: string[];
 }
