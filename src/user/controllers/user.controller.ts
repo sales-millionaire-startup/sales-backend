@@ -4,6 +4,6 @@ import { Controller, Get } from '@nestjs/common';
 export class UserController {
   @Get('')
   async getUser(): Promise<any> {
-    return 'vaaax ai ai ai exla martla: sul sxva aris chemi zeca tabadabadaaa';
+    return 'vaaax ai ai ai exla martla:1111 sul sxva aris chemi zeca tabadabadaaa';
   }
 }
