@@ -47,7 +47,7 @@ export class ProductService {
         data: specificationData,
       });
 
-      return await this.getProductsTree(newProduct);
+      return await this.getProductsTree(tx, newProduct);
     });
   }
 
@@ -118,7 +118,7 @@ export class ProductService {
         }
       }
 
-      return await this.getProductsTree(updatedProduct);
+      return await this.getProductsTree(tx, updatedProduct);
     });
   }
 
@@ -145,8 +145,8 @@ export class ProductService {
     });
   }
 
-  private async getProductsTree(product) {
-    return await this.prisma.category.findUnique({
+  private async getProductsTree(tx, product) {
+    return await tx.category.findUnique({
       where: { id: product.category.parentMostCategoryId },
       include: includeChildrenRecursive(
         product.category.parentMostCategory.maxDepth || 0,
