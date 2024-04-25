@@ -147,7 +147,7 @@ export class ProductService {
 
   private async getProductsTree(product) {
     return await this.prisma.category.findUnique({
-      where: { id: product.category.parentCategoryId },
+      where: { id: product.category.parentMostCategoryId },
       include: includeChildrenRecursive(
         product.category.parentMostCategory.maxDepth || 0,
       ),
