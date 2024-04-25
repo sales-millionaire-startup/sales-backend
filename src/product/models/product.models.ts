@@ -20,7 +20,7 @@ export interface SpecificationInput {
   name_ge?: string;
   name_tr?: string;
   productId: number;
-  unitId: number;
+  unitElementId: number;
   values_en?: string[];
   values_ge?: string[];
   values_tr?: string[];
