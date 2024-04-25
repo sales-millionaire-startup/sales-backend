@@ -121,10 +121,14 @@ export class CategoryService {
         },
       });
 
-      return await this.getParentCategoryWithChildren(
-        category.parentMostCategoryId,
-        updatedMaxDepth,
-      );
+      return await this.getProductsTree(tx, category, updatedMaxDepth);
+    });
+  }
+
+  private async getProductsTree(tx, category, updatedMaxDepth) {
+    return await tx.category.findUnique({
+      where: { id: category.parentMostCategoryId },
+      include: includeChildrenRecursive(updatedMaxDepth || 0),
     });
   }
 
