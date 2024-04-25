@@ -5,6 +5,7 @@ import {
   ProductUpdateInput,
 } from '../models/product.models';
 import { includeChildrenRecursive } from '../../category/prisma-helpers/category-prisma-helpers';
+import {ApiError} from "../../core/api-errors/api-error";
 
 @Injectable()
 export class ProductService {
@@ -138,10 +139,33 @@ export class ProductService {
   }
 
   async deleteProduct(productId) {
-    await this.prisma.product.delete({
-      where: {
-        id: productId,
-      },
+    return await this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.findUnique({
+        where: {
+          id: productId,
+        },
+        include: {
+          category: {
+            include: {
+              parentMostCategory: true,
+            },
+          },
+        },
+      });
+
+      if (!product) {
+        throw new ApiError(
+          404,
+          'product_does_not_exists',
+          'product_does_not_exists',
+        );
+      }
+      await tx.product.delete({
+        where: {
+          id: productId,
+        },
+      });
+      return await this.getProductsTree(tx, product);
     });
   }
 

@@ -95,25 +95,59 @@ export class CategoryService {
   }
 
   async deleteCategory(categoryId: number) {
-    const catagory = await this.prisma.category.findUnique({
-      where: {
-        id: categoryId,
-      },
-    });
+    return await this.prisma.$transaction(async (tx) => {
+      const category = await tx.category.findUnique({
+        where: {
+          id: categoryId,
+        },
+        include: {
+          parentMostCategory: true,
+        },
+      });
 
-    if (!catagory) {
-      throw new ApiError(404, 'not_found', 'not_found');
+      if (!category) {
+        throw new ApiError(
+          404,
+          'category_does_not_exists',
+          'category_does_not_exists',
+        );
+      }
+
+      const updatedMaxDepth = await this.updateParentMostCategory(category, tx);
+
+      await tx.category.delete({
+        where: {
+          id: categoryId,
+        },
+      });
+
+      return await this.getParentCategoryWithChildren(
+        category.parentMostCategoryId,
+        updatedMaxDepth,
+      );
+    });
+  }
+
+  private async updateParentMostCategory(categoryBeingDeleted, tx) {
+    let newMaxDepth = categoryBeingDeleted.parentMostCategory.maxDepth;
+    if (
+      categoryBeingDeleted.depth ===
+      categoryBeingDeleted.parentMostCategory.maxDepth
+    ) {
+      newMaxDepth =
+        categoryBeingDeleted.depth - 1 >= 0
+          ? categoryBeingDeleted.depth - 1
+          : 0;
+
+      await tx.category.update({
+        where: {
+          id: categoryBeingDeleted.parentMostCategoryId,
+        },
+        data: {
+          maxDepth: newMaxDepth,
+        },
+      });
     }
-
-    await this.prisma.category.delete({
-      where: {
-        id: categoryId,
-      },
-    });
-
-    return await this.getParentCategoryWithChildren(
-      catagory.parentMostCategoryId,
-      catagory.depth,
-    );
+    return newMaxDepth;
   }
 }
