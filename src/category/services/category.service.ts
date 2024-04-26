@@ -26,72 +26,88 @@ export class CategoryService {
     });
   }
 
-  async createSingleCategory(input: CategoryCreateInput) {
-    //Creates newCategory
-    const newCategory = await this.prisma.category.create({
-      data: {
-        name_en: input.name_en,
-        name_ge: input.name_ge,
-        name_tr: input.name_tr,
-        depth: input.depth,
-        parentCategoryId: input.parentCategoryId,
-        parentMostCategoryId: input.parentMostCategoryId,
-      },
-      include: {
-        parentCategory: true,
-      },
+  private async getParentCategoryWithChildrenForTransaction(
+    categoryId: number,
+    depth: number,
+    tx,
+  ) {
+    return await tx.category.findUnique({
+      where: { id: categoryId },
+      include: includeChildrenRecursive(depth || 0),
     });
+  }
 
-    let maxDepth = newCategory.parentCategory?.maxDepth || 0;
-    const parentMostCategoryId = input.parentMostCategoryId || newCategory.id;
-
-    //Updates parentMostCategory if depth increases
-    if (newCategory.depth > maxDepth) {
-      maxDepth = newCategory.depth;
-
-      return await this.prisma.category.update({
-        where: {
-          id: newCategory.parentMostCategoryId,
-        },
+  async createSingleCategory(input: CategoryCreateInput) {
+    return await this.prisma.$transaction(async (tx) => {
+      const newCategory = await tx.category.create({
         data: {
-          maxDepth: maxDepth,
+          name_en: input.name_en,
+          name_ge: input.name_ge,
+          name_tr: input.name_tr,
+          depth: input.depth,
+          parentCategoryId: input.parentCategoryId,
+          parentMostCategoryId: input.parentMostCategoryId,
         },
-        include: includeChildrenRecursive(maxDepth || 0),
+        include: {
+          parentMostCategory: true,
+        },
       });
-    }
 
-    return await this.getParentCategoryWithChildren(
-      parentMostCategoryId,
-      maxDepth,
-    );
+      let maxDepth = newCategory.parentMostCategory?.maxDepth || 0;
+      const parentMostCategoryId = input.parentMostCategoryId || newCategory.id;
+
+      //Updates parentMostCategory if depth increases
+      if (newCategory.depth > maxDepth) {
+        maxDepth = newCategory.depth;
+
+        return await tx.category.update({
+          where: {
+            id: newCategory.parentMostCategoryId,
+          },
+          data: {
+            maxDepth: maxDepth,
+          },
+          include: includeChildrenRecursive(maxDepth || 0),
+        });
+      }
+
+      return await this.getParentCategoryWithChildrenForTransaction(
+        parentMostCategoryId,
+        maxDepth,
+        tx,
+      );
+    });
   }
 
   async updateSingleCategory(input: CategoryUpdateInput, categoryId: number) {
-    const category = await this.prisma.category.findUnique({
-      where: {
-        id: categoryId,
-      },
+    return await this.prisma.$transaction(async (tx) => {
+      const category = await tx.category.findUnique({
+        where: {
+          id: categoryId,
+        },
+      });
+
+      if (!category) {
+        throw new ApiError(404, 'not_found', 'not_found');
+      }
+
+      const updatedCategory = await tx.category.update({
+        where: {
+          id: categoryId,
+        },
+        data: {
+          name_en: input.name_en,
+          name_ge: input.name_ge,
+          name_tr: input.name_tr,
+        },
+      });
+
+      return await this.getParentCategoryWithChildrenForTransaction(
+        category.parentMostCategoryId,
+        updatedCategory.maxDepth,
+        tx,
+      );
     });
-
-    if (!category) {
-      throw new ApiError(404, 'not_found', 'not_found');
-    }
-
-    const updatedCategory = await this.prisma.category.update({
-      where: {
-        id: categoryId,
-      },
-      data: {
-        name_en: input.name_en,
-        name_ge: input.name_ge,
-        name_tr: input.name_tr,
-      },
-    });
-
-    return await this.getParentCategoryWithChildren(
-      category.parentMostCategoryId,
-      updatedCategory.maxDepth,
-    );
   }
 
   async deleteCategory(categoryId: number) {
@@ -126,17 +142,20 @@ export class CategoryService {
   }
 
   private async getProductsTree(tx, category, updatedMaxDepth) {
-    return await tx.category.findUnique({
-      where: { id: category.parentMostCategoryId },
-      include: includeChildrenRecursive(updatedMaxDepth || 0),
-    });
+    if (category.parentMostCategory) {
+      return await tx.category.findUnique({
+        where: { id: category.parentMostCategoryId },
+        include: includeChildrenRecursive(updatedMaxDepth || 0),
+      });
+    }
+    return [];
   }
 
   private async updateParentMostCategory(categoryBeingDeleted, tx) {
-    let newMaxDepth = categoryBeingDeleted.parentMostCategory.maxDepth;
+    let newMaxDepth = categoryBeingDeleted.parentMostCategory?.maxDepth;
     if (
       categoryBeingDeleted.depth ===
-      categoryBeingDeleted.parentMostCategory.maxDepth
+      categoryBeingDeleted.parentMostCategory?.maxDepth
     ) {
       newMaxDepth =
         categoryBeingDeleted.depth - 1 >= 0
