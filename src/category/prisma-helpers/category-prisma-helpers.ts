@@ -3,10 +3,10 @@ const includeChildrenRecursive = (
   depth: number,
   productsInclude = includeProductsNested,
 ): Record<string, any> => {
-  if (depth === 0) {
-    // Base case: return empty object when depth is 0
-    return {};
-  }
+  // if (depth === 0) {
+  //   // Base case: return empty object when depth is 0
+  //   return {};
+  // }
 
   // Include products at the current level
   const includeAtLevel = {
@@ -16,7 +16,7 @@ const includeChildrenRecursive = (
     },
   };
 
-  if (depth > 1) {
+  if (depth >= 1) {
     // Recursively include child categories and products for deeper levels
     includeAtLevel.childCategories.include = includeChildrenRecursive(
       depth - 1,
