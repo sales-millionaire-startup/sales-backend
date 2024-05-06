@@ -6,7 +6,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {});
   app.enableCors({
-    origin: 'https://d35dh7a9lkzan1.cloudfront.net', // Frontend domain
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // HTTP methods to allow
     credentials: true, // Allow credentials if needed
   });
