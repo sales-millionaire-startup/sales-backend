@@ -17,9 +17,9 @@ datasource db {
 model Category {
     id Int @id @default(autoincrement())
 
-    name_en String? @unique
-    name_ge String? @unique
-    name_tr String? @unique
+    name_en String?
+    name_ge String?
+    name_tr String?
 
     depth Int?
     maxDepth Int? @default(0)

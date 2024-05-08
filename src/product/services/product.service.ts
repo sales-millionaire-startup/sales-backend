@@ -5,7 +5,7 @@ import {
   ProductUpdateInput,
 } from '../models/product.models';
 import { includeChildrenRecursive } from '../../category/prisma-helpers/category-prisma-helpers';
-import {ApiError} from "../../core/api-errors/api-error";
+import { ApiError } from '../../core/api-errors/api-error';
 
 @Injectable()
 export class ProductService {
@@ -173,7 +173,7 @@ export class ProductService {
     return await tx.category.findUnique({
       where: { id: product.category.parentMostCategoryId },
       include: includeChildrenRecursive(
-        product.category.parentMostCategory.maxDepth || 0,
+        product.category.parentMostCategory?.maxDepth || 0,
       ),
     });
   }
