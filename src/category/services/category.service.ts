@@ -19,10 +19,25 @@ export class CategoryService {
     });
   }
 
-  async getParentCategoryWithChildren(categoryId: number, depth: number) {
+  async getParentCategoryWithChildren(categoryId: number) {
+    const category = await this.prisma.category.findUnique({
+      where: {
+        id: categoryId,
+      },
+      include: {
+        parentMostCategory: true,
+      },
+    });
+
+    if (!category) {
+      throw new ApiError(404, 'not_found', 'not_found');
+    }
+
     return await this.prisma.category.findUnique({
       where: { id: categoryId },
-      include: includeChildrenRecursive(depth || 0),
+      include: includeChildrenRecursive(
+        category.parentMostCategory?.maxDepth || 0,
+      ),
     });
   }
 
@@ -103,7 +118,7 @@ export class CategoryService {
       });
 
       return await this.getParentCategoryWithChildrenForTransaction(
-        category.parentMostCategoryId,
+        category.parentMostCategoryId || category.id,
         updatedCategory.maxDepth,
         tx,
       );

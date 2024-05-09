@@ -26,13 +26,8 @@ export class CategoryController {
 
   @Get(':categoryId')
   async getCategory(
-    @Param('categoryId', new ParseIntPipe()) categoryId: number,
-    @Query('depth') depth: number,
-  ): Promise<any> {
-    return await this.categoryService.getParentCategoryWithChildren(
-      categoryId,
-      +depth,
-    );
+    @Param('categoryId', new ParseIntPipe()) categoryId: number): Promise<any> {
+    return await this.categoryService.getParentCategoryWithChildren(categoryId);
   }
 
   @Post('')
