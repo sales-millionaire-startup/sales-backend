@@ -178,7 +178,9 @@ export class ProductService {
     }
 
     return await tx.category.findUnique({
-      where: { id: product.category.parentMostCategoryId },
+      where: {
+        id: product.category?.parentMostCategoryId || product.categoryId,
+      },
       include: includeChildrenRecursive(maxDepth),
     });
   }
