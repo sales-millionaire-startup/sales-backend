@@ -19,25 +19,12 @@ export class CategoryService {
     });
   }
 
-  async getParentCategoryWithChildren(categoryId: number) {
-    const category = await this.prisma.category.findUnique({
-      where: {
-        id: categoryId,
-      },
-      include: {
-        parentMostCategory: true,
-      },
-    });
-
-    if (!category) {
-      throw new ApiError(404, 'not_found', 'not_found');
-    }
-
+  async getParentCategoryWithChildren(categoryId: number, depth: number) {
+    const includes = includeChildrenRecursive(depth || 0);
+    console.log(JSON.stringify(includes));
     return await this.prisma.category.findUnique({
       where: { id: categoryId },
-      include: includeChildrenRecursive(
-        category.parentMostCategory?.maxDepth || 0,
-      ),
+      include: includes,
     });
   }
 
@@ -172,10 +159,19 @@ export class CategoryService {
       categoryBeingDeleted.depth ===
       categoryBeingDeleted.parentMostCategory?.maxDepth
     ) {
-      newMaxDepth =
-        categoryBeingDeleted.depth - 1 >= 0
-          ? categoryBeingDeleted.depth - 1
-          : 0;
+      const existingOnLastLevel = await this.prisma.category.findFirst({
+        where: {
+          depth: categoryBeingDeleted.depth,
+          parentCategoryId: categoryBeingDeleted.parentMostCategoryId,
+        },
+      });
+
+      if (!existingOnLastLevel) {
+        newMaxDepth =
+          categoryBeingDeleted.depth - 1 >= 0
+            ? categoryBeingDeleted.depth - 1
+            : 0;
+      }
 
       await tx.category.update({
         where: {
