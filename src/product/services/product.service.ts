@@ -170,11 +170,16 @@ export class ProductService {
   }
 
   private async getProductsTree(tx, product) {
+    let maxDepth = 0;
+    if (product?.category?.parentMostCategory) {
+      maxDepth = product.category.parentMostCategory?.maxDepth;
+    } else {
+      maxDepth = product?.category?.maxDepth || 0;
+    }
+
     return await tx.category.findUnique({
       where: { id: product.category.parentMostCategoryId },
-      include: includeChildrenRecursive(
-        product.category.parentMostCategory?.maxDepth || 0,
-      ),
+      include: includeChildrenRecursive(maxDepth),
     });
   }
 }
