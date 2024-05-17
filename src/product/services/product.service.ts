@@ -6,12 +6,29 @@ import {
 } from '../models/product.models';
 import { includeChildrenRecursive } from '../../category/prisma-helpers/category-prisma-helpers';
 import { ApiError } from '../../core/api-errors/api-error';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class ProductService {
-  constructor(private prisma: PrismaService) {}
+  private readonly s3Client: S3Client;
 
-  async createSingleProduct(productCreateInput: ProductCreateInput) {
+  constructor(private prisma: PrismaService) {
+    this.s3Client = new S3Client({
+      credentials: {
+        accessKeyId: process.env.ACCESS_KEY,
+        secretAccessKey: process.env.SECRET_ACCESS_KEY,
+      },
+      region: process.env.AWS_S3_REGION,
+    });
+  }
+
+  async createSingleProduct(productCreateInput: ProductCreateInput, file) {
+    const imageName = await this.uploadFile(file);
     return await this.prisma.$transaction(async (tx) => {
       // Create the product
       const newProduct = await tx.product.create({
@@ -20,6 +37,8 @@ export class ProductService {
           name_ge: productCreateInput.name_ge,
           name_tr: productCreateInput.name_tr,
           categoryId: productCreateInput.categoryId,
+          imageName: imageName,
+          imageUrl: process.env.IMAGE_URL + imageName,
         },
         include: {
           category: {
@@ -38,9 +57,6 @@ export class ProductService {
           name_tr: spec.name_tr,
           productId: newProduct.id,
           unitElementId: spec.unitElementId,
-          values_en: spec.values_en,
-          values_ge: spec.values_ge,
-          values_tr: spec.values_tr,
         }),
       );
 
@@ -52,7 +68,27 @@ export class ProductService {
     });
   }
 
-  async updateSingleProduct(productUpdateInput: ProductUpdateInput, productId) {
+  async updateSingleProduct(
+    productUpdateInput: ProductUpdateInput,
+    productId,
+    file,
+  ) {
+    const product = await this.prisma.product.findUnique({
+      where: {
+        id: productId,
+      },
+    });
+
+    if (!product) {
+      throw new ApiError(404, 'not_found', 'not_found');
+    }
+
+    let imageName = productUpdateInput.imageName;
+
+    if (productUpdateInput.imageName !== product.imageName) {
+      imageName = await this.uploadFile(file);
+    }
+
     return await this.prisma.$transaction(async (tx) => {
       // Update the product with the given productId
       const updatedProduct = await tx.product.update({
@@ -63,6 +99,8 @@ export class ProductService {
           name_en: productUpdateInput.name_en,
           name_ge: productUpdateInput.name_ge,
           name_tr: productUpdateInput.name_tr,
+          imageName: imageName,
+          imageUrl: process.env.IMAGE_URL + imageName,
           categoryId: productUpdateInput.categoryId,
         },
         include: {
@@ -89,9 +127,6 @@ export class ProductService {
               name_ge: spec.name_ge,
               name_tr: spec.name_tr,
               unitElementId: spec.unitElementId,
-              values_en: spec.values_en,
-              values_ge: spec.values_ge,
-              values_tr: spec.values_tr,
             },
             include: {
               unitElement: true, // Include the unit in the updated specification
@@ -107,9 +142,6 @@ export class ProductService {
               name_tr: spec.name_tr,
               productId: productId,
               unitElementId: spec.unitElementId,
-              values_en: spec.values_en,
-              values_ge: spec.values_ge,
-              values_tr: spec.values_tr,
             },
             include: {
               unitElement: true, // Include the unit in the new specification
@@ -165,12 +197,14 @@ export class ProductService {
           id: productId,
         },
       });
+
+      await this.deleteImage(product);
       return await this.getProductsTree(tx, product);
     });
   }
 
   private async getProductsTree(tx, product) {
-    let maxDepth = 0;
+    let maxDepth: number;
     if (product?.category?.parentMostCategory) {
       maxDepth = product.category.parentMostCategory?.maxDepth;
     } else {
@@ -183,5 +217,37 @@ export class ProductService {
       },
       include: includeChildrenRecursive(maxDepth),
     });
+  }
+
+  private async uploadFile(file) {
+    if (!file?.originalname) {
+      throw new Error('File name is required.');
+    }
+
+    const randomImageName = (bytes = 32) =>
+      crypto.randomBytes(bytes).toString('hex');
+
+    const res = randomImageName();
+
+    await this.s3Client.send(
+      new PutObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKE_NAME,
+        Key: res,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+        ContentDisposition: 'inline',
+      }),
+    );
+
+    return res;
+  }
+
+  private async deleteImage(product: any) {
+    await this.s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKE_NAME,
+        Key: product.imageName,
+      }),
+    );
   }
 }

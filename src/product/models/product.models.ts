@@ -11,6 +11,7 @@ export interface ProductUpdateInput {
   name_ge?: string;
   name_tr?: string;
   categoryId: number;
+  imageName?: string;
   specifications: Array<SpecificationInput>;
 }
 
