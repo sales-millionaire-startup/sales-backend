@@ -198,7 +198,7 @@ export class ProductService {
         },
       });
 
-      await this.deleteImage(product);
+      //await this.deleteImage(product);
       return await this.getProductsTree(tx, product);
     });
   }
@@ -220,6 +220,10 @@ export class ProductService {
   }
 
   private async uploadFile(file) {
+    if (!file) {
+      return '';
+    }
+
     if (!file?.originalname) {
       throw new Error('File name is required.');
     }

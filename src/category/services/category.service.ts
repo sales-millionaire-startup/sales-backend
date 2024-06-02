@@ -21,7 +21,7 @@ export class CategoryService {
 
   async getParentCategoryWithChildren(categoryId: number, depth: number) {
     const includes = includeChildrenRecursive(depth || 0);
-    console.log(JSON.stringify(includes));
+    //console.log(JSON.stringify(includes));
     return await this.prisma.category.findUnique({
       where: { id: categoryId },
       include: includes,
