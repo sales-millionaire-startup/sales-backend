@@ -14,90 +14,99 @@ datasource db {
 }
 
 model Category {
-    id                      Int       @id @default(autoincrement())
-    name_en                 String?
-    name_ge                 String?
-    name_tr                 String?
-    depth                   Int?
-    maxDepth                Int?      @default(0)
-    parentCategoryId        Int?
-    parentCategory          Category? @relation("childCategories", fields: [parentCategoryId], references: [id], onDelete: Cascade)
-    childCategories         Category[] @relation("childCategories")
-    parentMostCategoryId    Int?
-    parentMostCategory      Category? @relation("parentMostCategory", fields: [parentMostCategoryId], references: [id], onDelete: Cascade)
-    parentMostChildCategories Category[] @relation("parentMostCategory")
-    products                Product[]
-    createdAt               DateTime  @default(now())
-    updatedAt               DateTime  @default(now())
+  id                        Int        @id @default(autoincrement())
+  name_en                   String?
+  name_ge                   String?
+  name_tr                   String?
+  depth                     Int?
+  maxDepth                  Int?       @default(0)
+  parentCategoryId          Int?
+  parentCategory            Category?  @relation("childCategories", fields: [parentCategoryId], references: [id], onDelete: Cascade)
+  childCategories           Category[] @relation("childCategories")
+  parentMostCategoryId      Int?
+  parentMostCategory        Category?  @relation("parentMostCategory", fields: [parentMostCategoryId], references: [id], onDelete: Cascade)
+  parentMostChildCategories Category[] @relation("parentMostCategory")
+  products                  Product[]
+  createdAt                 DateTime   @default(now())
+  updatedAt                 DateTime   @default(now())
 }
 
 model Product {
-    id             Int             @id @default(autoincrement())
-    name_en        String?         @unique
-    name_ge        String?         @unique
-    name_tr        String?         @unique
-    imageName      String?
-    imageUrl       String?
-    categoryId     Int
-    category       Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-    specifications Specification[]
-    cartItems      CartItem[]
-    createdAt      DateTime        @default(now())
-    updatedAt      DateTime        @default(now())
+  id             Int             @id @default(autoincrement())
+  name_en        String?         @unique
+  name_ge        String?         @unique
+  name_tr        String?         @unique
+  imageName      String?
+  imageUrl       String?
+  categoryId     Int
+  category       Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  specifications Specification[]
+  cartItems      CartItem[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now())
 }
 
 model Specification {
-    id             Int             @id @default(autoincrement())
-    name_en        String?
-    name_ge        String?
-    name_tr        String?
-    productId      Int
-    product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-    unitElementId  Int
-    unitElement    UnitElement     @relation(fields: [unitElementId], references: [id])
-    cartItems      CartItem[]
-    createdAt      DateTime        @default(now())
-    updatedAt      DateTime        @default(now())
+  id            Int         @id @default(autoincrement())
+  name_en       String?
+  name_ge       String?
+  name_tr       String?
+  productId     Int
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  unitElementId Int
+  unitElement   UnitElement @relation(fields: [unitElementId], references: [id])
+  cartItems     CartItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @default(now())
 }
 
 model UnitElement {
-    id             Int             @id @default(autoincrement())
-    name_en        String?         @unique
-    name_ge        String?         @unique
-    name_tr        String?         @unique
-    specifications Specification[]
-    createdAt      DateTime        @default(now())
-    updatedAt      DateTime        @default(now())
+  id             Int             @id @default(autoincrement())
+  name_en        String?         @unique
+  name_ge        String?         @unique
+  name_tr        String?         @unique
+  specifications Specification[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now())
 }
 
 model Cart {
-    id        Int       @id @default(autoincrement())
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @default(now())
-    userId    Int       @unique
-    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    cartItems CartItem[]
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
 }
 
 model User {
-    id        Int       @id @default(autoincrement())
-    name      String?
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @default(now())
-    cart      Cart?
+  id        Int      @id @default(autoincrement())
+  name      String?
+  email     String   @unique
+  password  String
+  role      Role     @default(BUYER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  cart      Cart?
+}
+
+enum Role {
+  ADMIN
+  SELLER
+  BUYER
 }
 
 model CartItem {
-    id             Int             @id @default(autoincrement())
-    cartId         Int
-    productId      Int
-    specificationId Int
-    value          String
+  id              Int    @id @default(autoincrement())
+  cartId          Int
+  productId       Int
+  specificationId Int
+  value           String
 
-    cart           Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
-    product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-    specification  Specification   @relation(fields: [specificationId], references: [id], onDelete: Cascade)
+  cart          Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  specification Specification @relation(fields: [specificationId], references: [id], onDelete: Cascade)
 
-    createdAt      DateTime        @default(now())
-    updatedAt      DateTime        @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }

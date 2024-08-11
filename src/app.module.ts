@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UnitElementModule } from './unitElement/unitElement.module';
 import { ConfigModule } from '@nestjs/config';
 import { CartModule } from './cart/cart.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CartModule } from './cart/cart.module';
     PrismaModule,
     CartModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
