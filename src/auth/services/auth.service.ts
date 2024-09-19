@@ -17,17 +17,39 @@ export class AuthService {
   ) {}
 
   async register(dto: AuthDto) {
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const user = await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        password: hashedPassword,
-        name: dto.name,
-        role: dto.role,
-      },
-    });
+    if (dto.role !== Role.BUYER && dto.role !== Role.SELLER) {
+      throw new BadRequestException('Role must be either SELLER or BUYER');
+    }
+
+    const user = await this.createUserEntities(dto);
 
     return this.generateToken(user);
+  }
+
+  private async createUserEntities(dto: AuthDto) {
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const transactionResult = await this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email: dto.email,
+          password: hashedPassword,
+          name: dto.name,
+          role: dto.role,
+        },
+      });
+
+      if (dto.role === Role.BUYER) {
+        await tx.cart.create({
+          data: {
+            userId: user.id,
+          },
+        });
+      }
+
+      return user;
+    });
+
+    return transactionResult;
   }
 
   async login(dto: LoginDto) {
