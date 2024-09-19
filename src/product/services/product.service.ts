@@ -221,12 +221,15 @@ export class ProductService {
 
   private async uploadFile(file) {
     if (!file) {
+      console.log('No file uploaded');
       return '';
     }
 
     if (!file?.originalname) {
       throw new Error('File name is required.');
     }
+
+    console.log('file: ' + file.originalname);
 
     const randomImageName = (bytes = 32) =>
       crypto.randomBytes(bytes).toString('hex');
@@ -242,7 +245,7 @@ export class ProductService {
         ContentDisposition: 'inline',
       }),
     );
-
+    console.log('result: ' + res);
     return res;
   }
 
