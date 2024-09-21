@@ -42,6 +42,7 @@ model Product {
   category       Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   specifications Specification[]
   cartItems      CartItem[]
+  purchaseRequestItems PurchaseRequestItem[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @default(now())
 }
@@ -51,11 +52,18 @@ model Specification {
   name_en       String?
   name_ge       String?
   name_tr       String?
+  isSplitable   Boolean? @default(false)
+  hierarchyInd  Int?
+
   productId     Int
   product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
   unitElementId Int
   unitElement   UnitElement @relation(fields: [unitElementId], references: [id])
+
   cartItemValues     CartItemValue[]
+  purchaseRequestItemValues PurchaseRequestItemValue[]
+
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @default(now())
 }
@@ -88,6 +96,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
   cart      Cart?
+  purchaseRequest PurchaseRequest?
+  purchaseRequestItemOnSellerResponse PurchaseRequestItemOnSellerResponse[]
+
 }
 
 enum Role {
@@ -100,6 +111,8 @@ model CartItem {
   id              Int    @id @default(autoincrement())
   cartId          Int
   productId       Int
+  imageName      String?
+  imageUrl       String?
   
   cart          Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
   product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -113,6 +126,7 @@ model CartItem {
 model CartItemValue {
   id              Int    @id @default(autoincrement())
   value           String?
+  buyerComment    String?
 
   cartItemId          Int?
   specificationId     Int?
@@ -122,4 +136,64 @@ model CartItemValue {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+}
+
+model PurchaseRequest {
+  id        Int        @id @default(autoincrement())
+  
+  userId     Int        @unique
+  buyer      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purchaseRequestItems PurchaseRequestItem[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+}
+
+model PurchaseRequestItem {
+  id              Int    @id @default(autoincrement())
+  purchaseRequestId      Int
+  productId       Int
+  
+  purchaseRequest          PurchaseRequest          @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
+  product                  Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  purchaseRequestItemValues PurchaseRequestItemValue[]
+  purchaseRequestItemOnSellerResponse PurchaseRequestItemOnSellerResponse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model PurchaseRequestItemValue {
+  id              Int    @id @default(autoincrement())
+  value           String?
+  buyerComment    String?
+
+  purchaseRequestItemId          Int?
+  specificationId     Int?
+
+  purchaseRequestItem          PurchaseRequestItem?          @relation(fields: [purchaseRequestItemId], references: [id], onDelete: Cascade)
+  specification Specification? @relation(fields: [specificationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model PurchaseRequestItemOnSellerResponse {
+  purchaseRequestItem   PurchaseRequestItem @relation(fields: [purchaseRequestItemId], references: [id], onDelete: Cascade)
+  purchaseRequestItemId Int
+
+  seller   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  sellerAcceptance Boolean
+  sellerPrice      Float?
+  sellerComment    String?
+  buyerAcceptance  Boolean?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@id([purchaseRequestItemId, userId])
+  @@unique([purchaseRequestItemId, userId], name: "purchaseRequestItemId_sellerId_unique_key")
 }

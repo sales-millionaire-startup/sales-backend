@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -6,9 +7,14 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CartService } from '../services/cart.service';
-import { CartItemCreateInput } from '../models/cart.models';
+import { CartItemCreateInput, CartItemUpdateInput, CartItemValue } from '../models/cart.models';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ParseJsonPipe } from 'src/core/parser/parse-json.pipe';
 
 @Controller('api/cart')
 export class CartController {
@@ -21,12 +27,23 @@ export class CartController {
     return await this.cartService.getCartItems(cartId);
   }
 
-  @Post(':cartId')
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('')
   async addCartItem(
-    @Param('cartId', new ParseIntPipe()) cartId: number,
+    @UploadedFile() file,
     @Body() cartItemCreateInput: CartItemCreateInput,
   ): Promise<any> {
-    return await this.cartService.addCartItem(cartId, cartItemCreateInput);
+    return await this.cartService.addCartItem(cartItemCreateInput, file);
+  }
+
+  @UseInterceptors(FileInterceptor('file'))
+  @Put(':cartItemId')
+  async uploadImageForCartItem(
+    @UploadedFile() file,
+    @Param('cartItemId', new ParseIntPipe()) cartItemId: number,
+    @Body('data', ParseJsonPipe) cartItemUpdateInput: CartItemUpdateInput,
+  ): Promise<any> {
+    return await this.cartService.updateCartItem(cartItemId, cartItemUpdateInput, file);
   }
 
   @Delete(':cartId/:cartItemId')

@@ -5,30 +5,18 @@ import {
   ProductUpdateInput,
 } from '../models/product.models';
 import { includeChildrenRecursive } from '../../category/prisma-helpers/category-prisma-helpers';
-import { ApiError } from '../../core/api-errors/api-error';
-import {
-  DeleteObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3';
-import * as crypto from 'crypto';
+import { FileService } from 'src/core/files/fileService';
+import { ApiError } from 'src/core/api-errors/api-error';
 
 @Injectable()
 export class ProductService {
-  private readonly s3Client: S3Client;
-
-  constructor(private prisma: PrismaService) {
-    this.s3Client = new S3Client({
-      credentials: {
-        accessKeyId: process.env.ACCESS_KEY,
-        secretAccessKey: process.env.SECRET_ACCESS_KEY,
-      },
-      region: process.env.AWS_S3_REGION,
-    });
-  }
+  constructor(
+    private prisma: PrismaService,
+    private fileService: FileService,
+  ) {}
 
   async createSingleProduct(productCreateInput: ProductCreateInput, file) {
-    const imageName = await this.uploadFile(file);
+    const imageName = await this.fileService.uploadFile(file);
     return await this.prisma.$transaction(async (tx) => {
       // Create the product
       const newProduct = await tx.product.create({
@@ -57,6 +45,8 @@ export class ProductService {
           name_tr: spec.name_tr,
           productId: newProduct.id,
           unitElementId: spec.unitElementId,
+          isSplitable: spec.isSplitable,
+          hierarchyIn: spec.hierarchyInd,
         }),
       );
 
@@ -70,7 +60,7 @@ export class ProductService {
 
   async updateSingleProduct(
     productUpdateInput: ProductUpdateInput,
-    productId,
+    productId: number,
     file,
   ) {
     const product = await this.prisma.product.findUnique({
@@ -86,7 +76,7 @@ export class ProductService {
     let imageName = productUpdateInput.imageName;
 
     if (productUpdateInput.imageName !== product.imageName) {
-      imageName = await this.uploadFile(file);
+      imageName = await this.fileService.uploadFile(file);
     }
 
     return await this.prisma.$transaction(async (tx) => {
@@ -127,6 +117,8 @@ export class ProductService {
               name_ge: spec.name_ge,
               name_tr: spec.name_tr,
               unitElementId: spec.unitElementId,
+              isSplitable: spec.isSplitable,
+              hierarchyInd: spec.hierarchyInd,
             },
             include: {
               unitElement: true, // Include the unit in the updated specification
@@ -142,6 +134,8 @@ export class ProductService {
               name_tr: spec.name_tr,
               productId: productId,
               unitElementId: spec.unitElementId,
+              isSplitable: spec.isSplitable,
+              hierarchyInd: spec.hierarchyInd,
             },
             include: {
               unitElement: true, // Include the unit in the new specification
@@ -164,6 +158,9 @@ export class ProductService {
         specifications: {
           include: {
             unitElement: true,
+          },
+          orderBy: {
+            hierarchyInd: 'asc',
           },
         },
       },
@@ -217,41 +214,5 @@ export class ProductService {
       },
       include: includeChildrenRecursive(maxDepth),
     });
-  }
-
-  private async uploadFile(file) {
-    if (!file) {
-      return '';
-    }
-
-    if (!file?.originalname) {
-      throw new Error('File name is required.');
-    }
-
-    const randomImageName = (bytes = 32) =>
-      crypto.randomBytes(bytes).toString('hex');
-
-    const res = randomImageName();
-
-    await this.s3Client.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_S3_BUCKE_NAME,
-        Key: res,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-        ContentDisposition: 'inline',
-      }),
-    );
-
-    return res;
-  }
-
-  private async deleteImage(product: any) {
-    await this.s3Client.send(
-      new DeleteObjectCommand({
-        Bucket: process.env.AWS_S3_BUCKE_NAME,
-        Key: product.imageName,
-      }),
-    );
   }
 }

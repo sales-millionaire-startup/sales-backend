@@ -22,7 +22,6 @@ export interface SpecificationInput {
   name_tr?: string;
   productId: number;
   unitElementId: number;
-  values_en?: string[];
-  values_ge?: string[];
-  values_tr?: string[];
+  isSplitable?: boolean;
+  hierarchyInd?: number;
 }

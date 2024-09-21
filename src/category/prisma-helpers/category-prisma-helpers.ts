@@ -34,6 +34,9 @@ const includeProductsNested = {
         include: {
           unitElement: true,
         },
+        orderBy: {
+          hierarchyInd: 'asc',
+        },
       },
     },
   },

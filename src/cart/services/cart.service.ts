@@ -1,11 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CartItemCreateInput } from '../models/cart.models';
+import {
+  CartItemCreateInput,
+  CartItemUpdateInput,
+} from '../models/cart.models';
 import { ApiError } from '../../core/api-errors/api-error';
+import { FileService } from 'src/core/files/fileService';
 
 @Injectable()
 export class CartService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private fileService: FileService,
+  ) {}
 
   async getCartItems(cartId: number) {
     const cart = await this.prisma.cart.findUnique({
@@ -37,11 +44,14 @@ export class CartService {
     });
   }
 
-  async addCartItem(cartId: number, cartItemCreateInput: CartItemCreateInput) {
+  async addCartItem(cartItemCreateInput: CartItemCreateInput, file) {
+    const imageName = await this.fileService.uploadFile(file);
     await this.prisma.cartItem.create({
       data: {
-        cartId: cartId,
+        cartId: cartItemCreateInput.cartId,
         productId: cartItemCreateInput.productId,
+        imageName: imageName,
+        imageUrl: process.env.IMAGE_URL + imageName,
         cartItemValues: {
           create:
             cartItemCreateInput.cartItemValues?.map((itemValue) => ({
@@ -54,6 +64,60 @@ export class CartService {
         cartItemValues: true,
       },
     });
+  }
+
+  async updateCartItem(
+    cartItemId: number,
+    cartItemUpdateInput: CartItemUpdateInput,
+    file,
+  ) {
+    // Fetch the existing cart item
+    const cartItem = await this.prisma.cartItem.findUnique({
+      where: {
+        id: cartItemId,
+      },
+      include: {
+        cartItemValues: true, // To include cart item values in the response
+      },
+    });
+
+    if (!cartItem) {
+      throw new ApiError(404, 'not_found', 'Cart item not found');
+    }
+
+    // Handle file upload if a new file is provided or if imageName has changed
+    let imageName = cartItem.imageName;
+    if (file || cartItemUpdateInput.imageName !== cartItem.imageName) {
+      imageName = await this.fileService.uploadFile(file);
+    }
+
+    // Construct updated image URL
+    const imageUrl = process.env.IMAGE_URL + imageName;
+
+    // Update cart item, including any changes to the cart item values
+    await this.prisma.cartItem.update({
+      where: {
+        id: cartItemId,
+      },
+      data: {
+        productId: cartItemUpdateInput.productId,
+        imageName: imageName,
+        imageUrl: imageUrl,
+        cartItemValues: {
+          deleteMany: {}, // Delete all existing cart item values before updating
+          create:
+            cartItemUpdateInput.cartItemValues?.map((itemValue) => ({
+              specificationId: itemValue.specificationId,
+              value: itemValue.value,
+            })) || [],
+        },
+      },
+      include: {
+        cartItemValues: true, // To return updated cart item values
+      },
+    });
+
+    return { message: 'Cart item updated successfully' };
   }
 
   private async validateItemSpecifications(cartItem, cartItemValues) {
