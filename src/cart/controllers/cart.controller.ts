@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CartService } from '../services/cart.service';
-import { CartItemCreateInput, CartItemUpdateInput, CartItemValue } from '../models/cart.models';
+import { CartItemCreateInput, CartItemUpdateInput } from '../models/cart.models';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ParseJsonPipe } from 'src/core/parser/parse-json.pipe';
 
