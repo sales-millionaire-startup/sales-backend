@@ -19,6 +19,10 @@ export class CategoryService {
     });
   }
 
+  async getAllFlattened() {
+    return await this.prisma.category.findMany();
+  }
+
   async getParentCategoryWithChildren(categoryId: number, depth: number) {
     const includes = includeChildrenRecursive(depth || 0);
 

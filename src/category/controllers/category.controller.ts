@@ -24,6 +24,11 @@ export class CategoryController {
     return await this.categoryService.getAllParentCategory();
   }
 
+  @Get('flattend')
+  async getFlattened(): Promise<any> {
+    return await this.categoryService.getAllFlattened();
+  }
+
   @Get(':categoryId')
   async getCategory(
     @Param('categoryId', new ParseIntPipe()) categoryId: number,
