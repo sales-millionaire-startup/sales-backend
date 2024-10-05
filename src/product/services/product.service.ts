@@ -46,7 +46,7 @@ export class ProductService {
           productId: newProduct.id,
           unitElementId: spec.unitElementId,
           isSplitable: spec.isSplitable,
-          hierarchyIn: spec.hierarchyInd,
+          hierarchyInd: productCreateInput.specifications.indexOf(spec),
         }),
       );
 
@@ -118,7 +118,7 @@ export class ProductService {
               name_tr: spec.name_tr,
               unitElementId: spec.unitElementId,
               isSplitable: spec.isSplitable,
-              hierarchyInd: spec.hierarchyInd,
+              hierarchyInd: productUpdateInput.specifications.indexOf(spec),
             },
             include: {
               unitElement: true, // Include the unit in the updated specification
@@ -135,7 +135,7 @@ export class ProductService {
               productId: productId,
               unitElementId: spec.unitElementId,
               isSplitable: spec.isSplitable,
-              hierarchyInd: spec.hierarchyInd,
+              hierarchyInd: productUpdateInput.specifications.indexOf(spec),
             },
             include: {
               unitElement: true, // Include the unit in the new specification

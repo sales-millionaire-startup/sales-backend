@@ -23,5 +23,4 @@ export interface SpecificationInput {
   productId: number;
   unitElementId: number;
   isSplitable?: boolean;
-  hierarchyInd?: number;
 }
