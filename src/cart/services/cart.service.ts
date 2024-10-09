@@ -6,6 +6,7 @@ import {
 } from '../models/cart.models';
 import { ApiError } from '../../core/api-errors/api-error';
 import { FileService } from 'src/core/files/fileService';
+import { cartItemIncludes } from '../prisma-helpers/cart-prisma-helpers';
 
 @Injectable()
 export class CartService {
@@ -29,18 +30,7 @@ export class CartService {
       where: {
         cartId: cartId,
       },
-      include: {
-        product: true,
-        cartItemValues: {
-          include: {
-            specification: {
-              include: {
-                unitElement: true,
-              },
-            },
-          },
-        },
-      },
+      include: cartItemIncludes,
     });
   }
 

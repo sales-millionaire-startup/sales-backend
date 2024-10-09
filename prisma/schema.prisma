@@ -82,8 +82,8 @@ model Cart {
   id        Int        @id @default(autoincrement())
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now())
-  userId    Int        @unique
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  buyerId    Int        @unique
+  buyer     Buyer       @relation(fields: [buyerId], references: [id], onDelete: Cascade)
   cartItems CartItem[]
 }
 
@@ -93,12 +93,24 @@ model User {
   email     String   @unique
   password  String
   role      Role     @default(BUYER)
+
+  buyer     Buyer?
+  seller    Seller?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+}
+
+model Buyer {
+  id        Int      @id @default(autoincrement())
+  userId      Int    @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   cart      Cart?
   purchaseRequest PurchaseRequest?
-  purchaseRequestItemOnSellerResponse PurchaseRequestItemOnSellerResponse[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 enum Role {
@@ -141,18 +153,28 @@ model CartItemValue {
 model PurchaseRequest {
   id        Int        @id @default(autoincrement())
   
-  userId     Int        @unique
-  buyer      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  buyerId     Int        @unique
+  buyer      Buyer       @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
   purchaseRequestItems PurchaseRequestItem[]
+  status PurchaseRequestStatus @default(PENDING)
 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now())
+}
+
+enum PurchaseRequestStatus {
+  PENDING
+  ONGOING
+  FINISHED
 }
 
 model PurchaseRequestItem {
   id              Int    @id @default(autoincrement())
   purchaseRequestId      Int
   productId       Int
+  imageName      String?
+  imageUrl       String?
   
   purchaseRequest          PurchaseRequest          @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
   product                  Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -162,12 +184,16 @@ model PurchaseRequestItem {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+
+  finishedAt DateTime?
 }
 
 model PurchaseRequestItemValue {
   id              Int    @id @default(autoincrement())
-  value           String?
-  buyerComment    String?
+  stringValue           String?
+  numericValue          Float?
+  buyerComment          String?
+  finalPrice            Float?
 
   purchaseRequestItemId          Int?
   specificationId     Int?
@@ -183,17 +209,36 @@ model PurchaseRequestItemOnSellerResponse {
   purchaseRequestItem   PurchaseRequestItem @relation(fields: [purchaseRequestItemId], references: [id], onDelete: Cascade)
   purchaseRequestItemId Int
 
-  seller   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
+  seller   Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId Int
 
   sellerAcceptance Boolean
   sellerPrice      Float?
+  sellerNumericValue Float?
   sellerComment    String?
   buyerAcceptance  Boolean?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  @@id([purchaseRequestItemId, userId])
-  @@unique([purchaseRequestItemId, userId], name: "purchaseRequestItemId_sellerId_unique_key")
+  @@id([purchaseRequestItemId, sellerId])
+  @@unique([purchaseRequestItemId, sellerId], name: "purchaseRequestItemId_sellerId_unique_key")
+}
+
+model Seller {
+  id        Int      @id @default(autoincrement())
+
+  companyName String?
+  address String?
+  city String?
+
+  categories Category[]
+
+  userId      Int    @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  purchaseRequestItemOnSellerResponse PurchaseRequestItemOnSellerResponse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }

@@ -39,7 +39,19 @@ export class AuthService {
       });
 
       if (dto.role === Role.BUYER) {
+        const buyer = await tx.buyer.create({
+          data: {
+            userId: user.id,
+          },
+        });
+
         await tx.cart.create({
+          data: {
+            buyerId: buyer.id,
+          },
+        });
+      } else if (dto.role === Role.SELLER) {
+        await tx.seller.create({
           data: {
             userId: user.id,
           },
