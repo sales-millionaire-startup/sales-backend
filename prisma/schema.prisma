@@ -27,6 +27,7 @@ model Category {
   parentMostCategory        Category?  @relation("parentMostCategory", fields: [parentMostCategoryId], references: [id], onDelete: Cascade)
   parentMostChildCategories Category[] @relation("parentMostCategory")
   products                  Product[]
+  sellers                   Seller[]
   createdAt                 DateTime   @default(now())
   updatedAt                 DateTime   @default(now())
 }
