@@ -1,20 +1,20 @@
 const purchaseRequestItemValueIncludes = {
-  include: {
-    specification: {
-      include: {
-        unitElement: true,
-      },
+    include: {
+        specification: {
+            include: {
+                unitElement: true,
+            },
+        },
     },
-  },
 };
 
 const purchaseRequestItemIncludes = {
-  purchaseRequestItems: {
-    include: {
-      product: true,
-      purchaseRequestItemValues: purchaseRequestItemValueIncludes,
+    purchaseRequestItems: {
+        include: {
+            product: true,
+            purchaseRequestItemValues: purchaseRequestItemValueIncludes,
+        },
     },
-  },
 };
 
 export { purchaseRequestItemValueIncludes, purchaseRequestItemIncludes };

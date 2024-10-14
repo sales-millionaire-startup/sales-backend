@@ -1,17 +1,17 @@
 import { cartIncludes } from 'src/cart/prisma-helpers/cart-prisma-helpers';
 
 const userBuyerIncludes = {
-  buyer: {
-    include: {
-      cart: {
-        include: cartIncludes,
-      },
+    buyer: {
+        include: {
+            cart: {
+                include: cartIncludes,
+            },
+        },
     },
-  },
 };
 
 const userSellerIncludes = {
-  seller: true,
+    seller: true,
 };
 
 export { userBuyerIncludes, userSellerIncludes };

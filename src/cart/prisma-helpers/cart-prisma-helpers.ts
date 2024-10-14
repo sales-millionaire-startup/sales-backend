@@ -1,22 +1,22 @@
 const cartItemValueIncludes = {
-  specification: {
-    include: {
-      unitElement: true,
+    specification: {
+        include: {
+            unitElement: true,
+        },
     },
-  },
 };
 
 const cartItemIncludes = {
-  product: true,
-  cartItemValues: {
-    include: cartItemValueIncludes,
-  },
+    product: true,
+    cartItemValues: {
+        include: cartItemValueIncludes,
+    },
 };
 
 const cartIncludes = {
-  cartItems: {
-    include: cartItemIncludes,
-  },
+    cartItems: {
+        include: cartItemIncludes,
+    },
 };
 
 export { cartItemValueIncludes, cartItemIncludes, cartIncludes };

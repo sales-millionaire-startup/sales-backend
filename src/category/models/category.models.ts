@@ -1,14 +1,33 @@
-export interface CategoryCreateInput {
-  name_en?: string;
-  name_ge?: string;
-  name_tr?: string;
-  depth?: number;
-  parentCategoryId?: number;
-  parentMostCategoryId?: number;
+/* eslint-disable indent */
+import { IsNumber, IsString } from 'class-validator';
+
+export class CategoryCreateInput {
+    @IsString()
+    name_en?: string;
+
+    @IsString()
+    name_ge?: string;
+
+    @IsString()
+    name_tr?: string;
+
+    @IsNumber()
+    depth?: number;
+
+    @IsNumber()
+    parentCategoryId?: number;
+
+    @IsNumber()
+    parentMostCategoryId?: number;
 }
 
-export interface CategoryUpdateInput {
-  name_en?: string;
-  name_ge?: string;
-  name_tr?: string;
+export class CategoryUpdateInput {
+    @IsString()
+    name_en?: string;
+
+    @IsString()
+    name_ge?: string;
+
+    @IsString()
+    name_tr?: string;
 }

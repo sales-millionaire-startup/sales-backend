@@ -1,16 +1,16 @@
 /* eslint-disable prettier/prettier */
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    ParseIntPipe,
+    Post,
+    Put,
+    UploadedFile,
+    UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { CartService } from '../services/cart.service';
 import { CartItemCreateInput, CartItemUpdateInput } from '../models/cart.models';
@@ -23,16 +23,16 @@ import { Roles } from 'src/core/common/roles.decorator';
 
 @Controller('api/cart')
 export class CartController {
-  constructor(private cartService: CartService) {}
+    constructor(private cartService: CartService) {}
 
   @Get(':cartId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.BUYER, Role.ADMIN)
-  async getCartItems(
+    async getCartItems(
     @Param('cartId', new ParseIntPipe()) cartId: number,
-  ): Promise<any> {
-    return await this.cartService.getCartItems(cartId);
-  }
+    ): Promise<any> {
+        return await this.cartService.getCartItems(cartId);
+    }
 
   @UseInterceptors(FileInterceptor('file'))
   @Post('')
@@ -42,7 +42,7 @@ export class CartController {
     @UploadedFile() file,
     @Body() cartItemCreateInput: CartItemCreateInput,
   ): Promise<any> {
-    return await this.cartService.addCartItem(cartItemCreateInput, file);
+      return await this.cartService.addCartItem(cartItemCreateInput, file);
   }
 
   @UseInterceptors(FileInterceptor('file'))
@@ -54,7 +54,7 @@ export class CartController {
     @Param('cartItemId', new ParseIntPipe()) cartItemId: number,
     @Body('data', ParseJsonPipe) cartItemUpdateInput: CartItemUpdateInput,
   ): Promise<any> {
-    return await this.cartService.updateCartItem(cartItemId, cartItemUpdateInput, file);
+      return await this.cartService.updateCartItem(cartItemId, cartItemUpdateInput, file);
   }
 
   @Delete(':cartId/:cartItemId')
@@ -64,6 +64,6 @@ export class CartController {
     @Param('cartId', new ParseIntPipe()) cartId: number,
     @Param('cartItemId', new ParseIntPipe()) cartItemId: number,
   ): Promise<any> {
-    return await this.cartService.removeCartItem(cartId, cartItemId);
+      return await this.cartService.removeCartItem(cartId, cartItemId);
   }
 }

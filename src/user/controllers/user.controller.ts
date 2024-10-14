@@ -8,12 +8,12 @@ import { Roles } from 'src/core/common/roles.decorator';
 
 @Controller('api/user')
 export class UserController {
-  constructor(private userService: UserService) {}
+    constructor(private userService: UserService) {}
 
-  @Get('')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.BUYER, Role.ADMIN)
-  async getUser(@CurrentUser() user: User): Promise<any> {
-    return await this.userService.getUser(user.id);
-  }
+    @Get('')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.BUYER, Role.ADMIN)
+    async getUser(@CurrentUser() user: User): Promise<any> {
+        return await this.userService.getUser(user.id);
+    }
 }

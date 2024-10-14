@@ -6,7 +6,7 @@ import { CartService } from './services/cart.service';
 import { FileService } from 'src/core/files/fileService';
 
 @Module({
-  controllers: [CartController],
-  providers: [CartService, PrismaService, PrismaClientService, FileService],
+    controllers: [CartController],
+    providers: [CartService, PrismaService, PrismaClientService, FileService],
 })
 export class CartModule {}

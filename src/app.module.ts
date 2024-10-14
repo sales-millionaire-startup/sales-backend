@@ -12,18 +12,18 @@ import { AuthModule } from './auth/auth.module';
 import { PurchaseRequestModule } from './purchaseRequest/purchaseRequest.module';
 
 @Module({
-  imports: [
-    UserModule,
-    CategoryModule,
-    ProductModule,
-    UnitElementModule,
-    PrismaModule,
-    CartModule,
-    ConfigModule.forRoot({ isGlobal: true }),
-    AuthModule,
-    PurchaseRequestModule,
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [
+        UserModule,
+        CategoryModule,
+        ProductModule,
+        UnitElementModule,
+        PrismaModule,
+        CartModule,
+        ConfigModule.forRoot({ isGlobal: true }),
+        AuthModule,
+        PurchaseRequestModule,
+    ],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule {}

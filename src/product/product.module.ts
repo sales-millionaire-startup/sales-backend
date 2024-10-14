@@ -6,7 +6,12 @@ import { PrismaClientService } from '../prisma/prisma-client.service';
 import { FileService } from 'src/core/files/fileService';
 
 @Module({
-  controllers: [ProductController],
-  providers: [ProductService, PrismaService, PrismaClientService, FileService],
+    controllers: [ProductController],
+    providers: [
+        ProductService,
+        PrismaService,
+        PrismaClientService,
+        FileService,
+    ],
 })
 export class ProductModule {}

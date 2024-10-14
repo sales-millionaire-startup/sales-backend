@@ -11,22 +11,22 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('api/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+    constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
-  async register(@Body() data: AuthDto) {
-    return this.authService.register(data);
-  }
+    @Post('register')
+    async register(@Body() data: AuthDto) {
+        return this.authService.register(data);
+    }
 
-  @Post('create-admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  async createAdmin(@Body() data: AuthDto, @CurrentUser() user: User) {
-    return this.authService.createAdmin(data, user);
-  }
+    @Post('create-admin')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    async createAdmin(@Body() data: AuthDto, @CurrentUser() user: User) {
+        return this.authService.createAdmin(data, user);
+    }
 
-  @Post('login')
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
-  }
+    @Post('login')
+    async login(@Body() dto: LoginDto) {
+        return this.authService.login(dto);
+    }
 }

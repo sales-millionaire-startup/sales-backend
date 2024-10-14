@@ -5,7 +5,7 @@ import { PurchaseRequestController } from './controllers/purchaseRequest.control
 import { PurchaseRequestService } from './services/purchaseRequest.service';
 
 @Module({
-  controllers: [PurchaseRequestController],
-  providers: [PurchaseRequestService, PrismaService, PrismaClientService],
+    controllers: [PurchaseRequestController],
+    providers: [PurchaseRequestService, PrismaService, PrismaClientService],
 })
 export class PurchaseRequestModule {}

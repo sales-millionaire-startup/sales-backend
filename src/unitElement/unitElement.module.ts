@@ -5,7 +5,7 @@ import { UnitElementService } from './services/unitElement.service';
 import { UnitElementController } from './controllers/unitElement.controller';
 
 @Module({
-  controllers: [UnitElementController],
-  providers: [UnitElementService, PrismaService, PrismaClientService],
+    controllers: [UnitElementController],
+    providers: [UnitElementService, PrismaService, PrismaClientService],
 })
 export class UnitElementModule {}

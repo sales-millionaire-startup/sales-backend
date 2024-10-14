@@ -11,98 +11,102 @@ import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private prisma: PrismaService,
-    private jwtService: JwtService,
-  ) {}
+    constructor(
+        private prisma: PrismaService,
+        private jwtService: JwtService,
+    ) {}
 
-  async register(dto: AuthDto) {
-    if (dto.role !== Role.BUYER && dto.role !== Role.SELLER) {
-      throw new BadRequestException('Role must be either SELLER or BUYER');
+    async register(dto: AuthDto) {
+        if (dto.role !== Role.BUYER && dto.role !== Role.SELLER) {
+            throw new BadRequestException(
+                'Role must be either SELLER or BUYER',
+            );
+        }
+
+        const user = await this.createUserEntities(dto);
+
+        return this.generateToken(user);
     }
 
-    const user = await this.createUserEntities(dto);
+    private async createUserEntities(dto: AuthDto) {
+        const hashedPassword = await bcrypt.hash(dto.password, 10);
+        const transactionResult = await this.prisma.$transaction(async (tx) => {
+            const user = await tx.user.create({
+                data: {
+                    email: dto.email,
+                    password: hashedPassword,
+                    name: dto.name,
+                    role: dto.role,
+                },
+            });
 
-    return this.generateToken(user);
-  }
+            if (dto.role === Role.BUYER) {
+                const buyer = await tx.buyer.create({
+                    data: {
+                        userId: user.id,
+                    },
+                });
 
-  private async createUserEntities(dto: AuthDto) {
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const transactionResult = await this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          email: dto.email,
-          password: hashedPassword,
-          name: dto.name,
-          role: dto.role,
-        },
-      });
+                await tx.cart.create({
+                    data: {
+                        buyerId: buyer.id,
+                    },
+                });
+            } else if (dto.role === Role.SELLER) {
+                await tx.seller.create({
+                    data: {
+                        userId: user.id,
+                    },
+                });
+            }
 
-      if (dto.role === Role.BUYER) {
-        const buyer = await tx.buyer.create({
-          data: {
-            userId: user.id,
-          },
+            return user;
         });
 
-        await tx.cart.create({
-          data: {
-            buyerId: buyer.id,
-          },
-        });
-      } else if (dto.role === Role.SELLER) {
-        await tx.seller.create({
-          data: {
-            userId: user.id,
-          },
-        });
-      }
-
-      return user;
-    });
-
-    return transactionResult;
-  }
-
-  async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
-
-    if (!user || !(await bcrypt.compare(dto.password, user.password))) {
-      throw new UnauthorizedException('Invalid credentials');
+        return transactionResult;
     }
 
-    return this.generateToken(user);
-  }
+    async login(dto: LoginDto) {
+        const user = await this.prisma.user.findUnique({
+            where: { email: dto.email },
+        });
 
-  private generateToken(user: any) {
-    const payload = { sub: user.id, email: user.email, role: user.role };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
-  }
+        if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
 
-  async validateUser(userId: number) {
-    return this.prisma.user.findUnique({ where: { id: userId } });
-  }
-
-  async createAdmin(data: AuthDto, currentUser: User) {
-    if (currentUser.role !== Role.ADMIN) {
-      throw new BadRequestException('Only an admin can create another admin.');
+        return this.generateToken(user);
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    private generateToken(user: any) {
+        const payload = { sub: user.id, email: user.email, role: user.role };
+        return {
+            access_token: this.jwtService.sign(payload),
+        };
+    }
 
-    const user = await this.prisma.user.create({
-      data: {
-        email: data.email,
-        password: hashedPassword,
-        name: data.name,
-        role: Role.ADMIN,
-      },
-    });
+    async validateUser(userId: number) {
+        return this.prisma.user.findUnique({ where: { id: userId } });
+    }
 
-    return user;
-  }
+    async createAdmin(data: AuthDto, currentUser: User) {
+        if (currentUser.role !== Role.ADMIN) {
+            throw new BadRequestException(
+                'Only an admin can create another admin.',
+            );
+        }
+
+        const hashedPassword = await bcrypt.hash(data.password, 10);
+
+        const user = await this.prisma.user.create({
+            data: {
+                email: data.email,
+                password: hashedPassword,
+                name: data.name,
+                role: Role.ADMIN,
+            },
+        });
+
+        return user;
+    }
 }
