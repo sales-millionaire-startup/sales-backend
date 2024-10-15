@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CartModule } from './cart/cart.module';
 import { AuthModule } from './auth/auth.module';
 import { PurchaseRequestModule } from './purchaseRequest/purchaseRequest.module';
+import { SellerModule } from './seller/seller.module';
 
 @Module({
     imports: [
@@ -22,6 +23,7 @@ import { PurchaseRequestModule } from './purchaseRequest/purchaseRequest.module'
         ConfigModule.forRoot({ isGlobal: true }),
         AuthModule,
         PurchaseRequestModule,
+        SellerModule,
     ],
     controllers: [AppController],
     providers: [AppService],

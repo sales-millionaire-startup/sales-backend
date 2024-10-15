@@ -15,13 +15,13 @@ import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/core/common/roles.guard';
 import { SellerService } from '../services/seller.service';
 
-@Controller('api/seller')
-export class CategoryController {
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('seller')
+export class SellerController {
     constructor(private sellerService: SellerService) {}
 
     @Get(':id')
     @Roles(Role.SELLER, Role.ADMIN)
-    @UseGuards(JwtAuthGuard, RolesGuard)
     async getSellerInfo(
         @Param('id', new ParseIntPipe()) id: number,
     ): Promise<any> {
@@ -30,7 +30,6 @@ export class CategoryController {
 
     @Post('category')
     @Roles(Role.SELLER, Role.ADMIN)
-    @UseGuards(JwtAuthGuard, RolesGuard)
     async setSellingCategories(
         @Body() sellerCategoryInput: SellerCategoryInput,
     ): Promise<any> {
@@ -41,7 +40,6 @@ export class CategoryController {
 
     @Put(':id')
     @Roles(Role.SELLER, Role.ADMIN)
-    @UseGuards(JwtAuthGuard, RolesGuard)
     async createCategory(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() sellerInfoInput: SellerInfoInput,

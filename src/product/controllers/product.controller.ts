@@ -23,12 +23,12 @@ import { RolesGuard } from 'src/core/common/roles.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Roles } from 'src/core/common/roles.decorator';
 
-@Controller('api/product')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('product')
 export class ProductController {
     constructor(private productService: ProductService) {}
 
     @Get(':categoryId')
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.BUYER, Role.ADMIN)
     async getCategoryProducts(
         @Param('categoryId', new ParseIntPipe()) categoryId: number,
@@ -37,9 +37,8 @@ export class ProductController {
     }
 
     @Post('')
-    @UseInterceptors(FileInterceptor('file'))
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
+    @UseInterceptors(FileInterceptor('file'))
     async createProduct(
         @UploadedFile() file,
         @Body('data', ParseJsonPipe) productCreateInput: ProductCreateInput,
@@ -51,12 +50,11 @@ export class ProductController {
     }
 
     @Put(':productId')
-    @UseInterceptors(FileInterceptor('file'))
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
+    @UseInterceptors(FileInterceptor('file'))
     async updateProduct(
         @UploadedFile() file,
-        @Param('productId', new ParseIntPipe()) productId,
+        @Param('productId', new ParseIntPipe()) productId: number,
         @Body('data', ParseJsonPipe) productUpdateInput: ProductUpdateInput,
     ): Promise<any> {
         return await this.productService.updateSingleProduct(
@@ -67,10 +65,9 @@ export class ProductController {
     }
 
     @Delete(':productId')
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async deleteProduct(
-        @Param('productId', new ParseIntPipe()) productId,
+        @Param('productId', new ParseIntPipe()) productId: number,
     ): Promise<any> {
         return await this.productService.deleteProduct(productId);
     }

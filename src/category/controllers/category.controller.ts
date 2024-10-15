@@ -20,26 +20,24 @@ import { Roles } from 'src/core/common/roles.decorator';
 import { RolesGuard } from 'src/core/common/roles.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-@Controller('api/category')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('category')
 export class CategoryController {
     constructor(private categoryService: CategoryService) {}
 
     @Get('')
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.BUYER, Role.ADMIN)
     async getAllParents(): Promise<any> {
         return await this.categoryService.getAllParentCategory();
     }
 
     @Get('flattend')
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async getFlattened(): Promise<any> {
         return await this.categoryService.getAllFlattened();
     }
 
     @Get(':categoryId')
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.BUYER, Role.ADMIN)
     async getCategory(
         @Param('categoryId', new ParseIntPipe()) categoryId: number,
@@ -52,7 +50,6 @@ export class CategoryController {
     }
 
     @Post('')
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async createCategory(
         @Body() categoryCreateInput: CategoryCreateInput,
@@ -63,7 +60,6 @@ export class CategoryController {
     }
 
     @Put(':categoryId')
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async updateCategory(
         @Param('categoryId', new ParseIntPipe()) categoryId,
@@ -76,7 +72,6 @@ export class CategoryController {
     }
 
     @Delete(':categoryId')
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async deleteModule(
         @Param('categoryId', new ParseIntPipe()) categoryId,

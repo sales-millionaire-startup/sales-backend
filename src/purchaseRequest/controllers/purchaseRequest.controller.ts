@@ -14,27 +14,26 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { PurchaseRequestUpdateInput } from '../models/purchaseRequest.models';
-@Controller('api/purchaseRequest')
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('purchaseRequest')
 export class PurchaseRequestController {
     constructor(private purchaseRequestService: PurchaseRequestService) {}
 
     @Get('')
     @Roles(Role.ADMIN, Role.BUYER)
-    @UseGuards(JwtAuthGuard, RolesGuard)
     async getPurchaseRequests(@CurrentUser() user: User): Promise<any> {
         return await this.purchaseRequestService.getPurchaseRequests(user.id);
     }
 
     @Post('')
     @Roles(Role.ADMIN, Role.BUYER)
-    @UseGuards(JwtAuthGuard, RolesGuard)
     async createPurchaseRequest(@CurrentUser() user: User): Promise<any> {
         return await this.purchaseRequestService.createPurchaseRequest(user.id);
     }
 
     @Put(':id')
     @Roles(Role.ADMIN, Role.BUYER)
-    @UseGuards(JwtAuthGuard, RolesGuard)
     async updatePurchaseRequest(
         @Param('id') id: number,
         @Body() purchaseRequestUpdateInput: PurchaseRequestUpdateInput,

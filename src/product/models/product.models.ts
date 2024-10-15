@@ -73,8 +73,9 @@ export class SpecificationInput {
     @IsNumber()
     productId: number;
 
+    @IsOptional()
     @IsNumber()
-    unitElementId: number;
+    unitElementId?: number | null;
 
     @IsOptional()
     @IsBoolean()

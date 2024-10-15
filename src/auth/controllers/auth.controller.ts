@@ -9,7 +9,7 @@ import { CurrentUser } from 'src/core/decorators/current-user.decorator';
 import { RolesGuard } from 'src/core/common/roles.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 

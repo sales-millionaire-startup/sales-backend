@@ -6,12 +6,12 @@ import { UserService } from '../services/user.service';
 import { Role, User } from '@prisma/client';
 import { Roles } from 'src/core/common/roles.decorator';
 
-@Controller('api/user')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('user')
 export class UserController {
     constructor(private userService: UserService) {}
 
     @Get('')
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.BUYER, Role.ADMIN)
     async getUser(@CurrentUser() user: User): Promise<any> {
         return await this.userService.getUser(user.id);

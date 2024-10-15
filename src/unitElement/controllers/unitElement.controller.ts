@@ -7,14 +7,20 @@ import {
     ParseIntPipe,
     Post,
     Put,
+    UseGuards,
 } from '@nestjs/common';
 import { UnitElementService } from '../services/unitElement.service';
 import {
     UnitElementCreateInput,
     UnitElementUpdateInput,
 } from '../models/unitElement.models';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Role } from '@prisma/client';
+import { Roles } from 'src/core/common/roles.decorator';
+import { RolesGuard } from 'src/core/common/roles.guard';
 
-@Controller('api/unit-element')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('unit-element')
 export class UnitElementController {
     constructor(private unitElementService: UnitElementService) {}
 
@@ -24,6 +30,7 @@ export class UnitElementController {
     }
 
     @Post('')
+    @Roles(Role.ADMIN)
     async createUnitElement(
         @Body() unitElementCreateInput: UnitElementCreateInput,
     ): Promise<any> {
@@ -44,6 +51,7 @@ export class UnitElementController {
     }
 
     @Delete(':unitElementId')
+    @Roles(Role.ADMIN)
     async deleteUnitElement(
         @Param('unitElementId', new ParseIntPipe()) unitElementId: number,
     ): Promise<any> {
