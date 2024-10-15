@@ -40,7 +40,10 @@ export class CartController {
         try {
             return await this.cartService.getCartItems(cartId);
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Failed to get cart items',
+            );
         }
     }
 
@@ -57,7 +60,10 @@ export class CartController {
                 file,
             );
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Failed to add cart item',
+            );
         }
     }
 
@@ -76,7 +82,10 @@ export class CartController {
                 file,
             );
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Failed to update cart item',
+            );
         }
     }
 
@@ -89,7 +98,10 @@ export class CartController {
         try {
             return await this.cartService.removeCartItem(cartId, cartItemId);
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Failed to remove cart item',
+            );
         }
     }
 }

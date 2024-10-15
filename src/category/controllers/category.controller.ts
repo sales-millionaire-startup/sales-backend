@@ -35,7 +35,10 @@ export class CategoryController {
         try {
             return await this.categoryService.getAllParentCategory();
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Failed to get all parent categories',
+            );
         }
     }
 
@@ -45,7 +48,10 @@ export class CategoryController {
         try {
             return await this.categoryService.getAllFlattened();
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Failed to get flattened categories',
+            );
         }
     }
 
@@ -61,7 +67,10 @@ export class CategoryController {
                 +depth,
             );
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                `Failed to get category with ID ${categoryId}`,
+            );
         }
     }
 
@@ -75,7 +84,10 @@ export class CategoryController {
                 categoryCreateInput,
             );
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Failed to create category',
+            );
         }
     }
 
@@ -91,7 +103,10 @@ export class CategoryController {
                 categoryId,
             );
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                `Failed to update category with ID ${categoryId}`,
+            );
         }
     }
 
@@ -103,7 +118,10 @@ export class CategoryController {
         try {
             return await this.categoryService.deleteCategory(categoryId);
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                `Failed to delete category with ID ${categoryId}`,
+            );
         }
     }
 }

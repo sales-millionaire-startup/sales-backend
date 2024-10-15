@@ -5,18 +5,22 @@ import {
     HttpStatus,
     BadRequestException,
     InternalServerErrorException,
+    Logger,
 } from '@nestjs/common';
 
 @Injectable()
 export class ErrorService {
+    private readonly logger = new Logger(ErrorService.name);
+
     async handleError(error: any, message?: string): Promise<never> {
-        console.error('Error:', error);
+        this.logger.error(`Error occurred: ${error.message}`, error.stack);
 
         switch (true) {
             case error instanceof HttpException:
                 throw error;
 
             case error instanceof BadRequestException:
+                this.logger.warn(`Bad request: ${error.message}`);
                 throw new BadRequestException({
                     message: message || 'Bad request',
                     error: error.message,
@@ -24,6 +28,10 @@ export class ErrorService {
                 });
 
             case error instanceof InternalServerErrorException:
+                this.logger.error(
+                    `Internal server error: ${error.message}`,
+                    error.stack,
+                );
                 throw new InternalServerErrorException({
                     message: message || 'Internal server error',
                     error: error.message,
@@ -31,6 +39,7 @@ export class ErrorService {
                 });
 
             case error.code === 'P2002':
+                this.logger.warn(`Duplicate entry: ${error.message}`);
                 throw new HttpException(
                     {
                         message: message || 'Duplicate entry',
@@ -41,6 +50,10 @@ export class ErrorService {
                 );
 
             default:
+                this.logger.error(
+                    `Unexpected error: ${error.message}`,
+                    error.stack,
+                );
                 throw new InternalServerErrorException({
                     message: message || 'Unexpected error occurred',
                     error: error.message,

@@ -4,12 +4,15 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule, {});
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+        logger: ['error', 'log'],
+    });
+
     app.setGlobalPrefix('api/');
     app.enableCors({
         origin: '*',
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // HTTP methods to allow
-        credentials: true, // Allow credentials if needed
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        credentials: true,
     });
     app.useStaticAssets(join(__dirname, '..', 'files'), {
         prefix: '/files/',

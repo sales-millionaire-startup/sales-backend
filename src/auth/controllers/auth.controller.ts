@@ -21,7 +21,10 @@ export class AuthController {
         try {
             return await this.authService.register(data);
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Error during user registration',
+            );
         }
     }
 
@@ -35,7 +38,10 @@ export class AuthController {
         try {
             return await this.authService.createAdmin(data, user);
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Error creating admin user',
+            );
         }
     }
 
@@ -44,7 +50,10 @@ export class AuthController {
         try {
             return await this.authService.login(dto);
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Error during user login',
+            );
         }
     }
 }

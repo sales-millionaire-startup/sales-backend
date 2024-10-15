@@ -40,7 +40,10 @@ export class ProductController {
         try {
             return await this.productService.getCategoryProducts(categoryId);
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                `Failed to get products for category ${categoryId}`,
+            );
         }
     }
 
@@ -57,7 +60,10 @@ export class ProductController {
                 file,
             );
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                'Failed to create product',
+            );
         }
     }
 
@@ -76,7 +82,10 @@ export class ProductController {
                 file,
             );
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                `Failed to update product ${productId}`,
+            );
         }
     }
 
@@ -88,7 +97,10 @@ export class ProductController {
         try {
             return await this.productService.deleteProduct(productId);
         } catch (error) {
-            return await this.errorService.handleError(error);
+            return await this.errorService.handleError(
+                error,
+                `Failed to delete product ${productId}`,
+            );
         }
     }
 }
