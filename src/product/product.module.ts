@@ -4,6 +4,7 @@ import { ProductService } from './services/product.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PrismaClientService } from '../prisma/prisma-client.service';
 import { FileService } from 'src/core/files/fileService';
+import { ErrorService } from 'src/core/error/error.service';
 
 @Module({
     controllers: [ProductController],
@@ -12,6 +13,7 @@ import { FileService } from 'src/core/files/fileService';
         PrismaService,
         PrismaClientService,
         FileService,
+        ErrorService,
     ],
 })
 export class ProductModule {}

@@ -14,18 +14,29 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/core/common/roles.guard';
 import { SellerService } from '../services/seller.service';
+import { ErrorService } from 'src/core/error/error.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('seller')
 export class SellerController {
-    constructor(private sellerService: SellerService) {}
+    constructor(
+        private sellerService: SellerService,
+        private errorService: ErrorService,
+    ) {}
 
     @Get(':id')
     @Roles(Role.SELLER, Role.ADMIN)
     async getSellerInfo(
         @Param('id', new ParseIntPipe()) id: number,
     ): Promise<any> {
-        return await this.sellerService.getSellerInfo(id);
+        try {
+            return await this.sellerService.getSellerInfo(id);
+        } catch (error) {
+            return await this.errorService.handleError(
+                error,
+                'Failed to retrieve seller info',
+            );
+        }
     }
 
     @Post('category')
@@ -33,17 +44,34 @@ export class SellerController {
     async setSellingCategories(
         @Body() sellerCategoryInput: SellerCategoryInput,
     ): Promise<any> {
-        return await this.sellerService.setSellingCategories(
-            sellerCategoryInput,
-        );
+        try {
+            return await this.sellerService.setSellingCategories(
+                sellerCategoryInput,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(
+                error,
+                'Failed to set selling categories',
+            );
+        }
     }
 
     @Put(':id')
     @Roles(Role.SELLER, Role.ADMIN)
-    async createCategory(
+    async updateSellerInfo(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() sellerInfoInput: SellerInfoInput,
     ): Promise<any> {
-        return await this.sellerService.updateSellerInfo(sellerInfoInput, id);
+        try {
+            return await this.sellerService.updateSellerInfo(
+                sellerInfoInput,
+                id,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(
+                error,
+                'Failed to update seller info',
+            );
+        }
     }
 }

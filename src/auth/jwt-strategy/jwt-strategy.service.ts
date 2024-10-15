@@ -8,20 +8,27 @@ import { AuthService } from '../services/auth.service';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
-        private configService: ConfigService, // Inject ConfigService
+        private configService: ConfigService,
         private authService: AuthService,
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: configService.get<string>('JWT_SECRET'), // Use ConfigService
+            secretOrKey: configService.get<string>('JWT_SECRET'),
         });
     }
 
     async validate(payload: any) {
-        const user = await this.authService.validateUser(payload.sub);
-        if (!user) {
-            throw new UnauthorizedException();
+        try {
+            const user = await this.authService.validateUser(payload.sub);
+            if (!user) {
+                throw new UnauthorizedException('User not found or inactive');
+            }
+            return user;
+        } catch (error) {
+            throw new UnauthorizedException({
+                message: 'Invalid token or unauthorized access',
+                statusCode: 401,
+            });
         }
-        return user;
     }
 }

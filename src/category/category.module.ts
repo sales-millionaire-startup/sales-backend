@@ -3,9 +3,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PrismaClientService } from '../prisma/prisma-client.service';
 import { CategoryService } from './services/category.service';
 import { CategoryController } from './controllers/category.controller';
+import { ErrorService } from 'src/core/error/error.service';
 
 @Module({
     controllers: [CategoryController],
-    providers: [CategoryService, PrismaService, PrismaClientService],
+    providers: [
+        CategoryService,
+        PrismaService,
+        PrismaClientService,
+        ErrorService,
+    ],
 })
 export class CategoryModule {}

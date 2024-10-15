@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigMo
 import { JwtStrategy } from './jwt-strategy/jwt-strategy.service';
 import { AuthController } from './controllers/auth.controller';
 import { AuthService } from './services/auth.service';
+import { ErrorService } from 'src/core/error/error.service';
 
 @Module({
     imports: [
@@ -23,7 +24,7 @@ import { AuthService } from './services/auth.service';
         }),
         ConfigModule, // Import ConfigModule to handle environment variables
     ],
-    providers: [AuthService, JwtStrategy],
+    providers: [AuthService, JwtStrategy, ErrorService],
     controllers: [AuthController],
 })
 export class AuthModule {}

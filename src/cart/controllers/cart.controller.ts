@@ -12,6 +12,7 @@ import {
     UseInterceptors,
 } from '@nestjs/common';
 import { CartService } from '../services/cart.service';
+import { ErrorService } from 'src/core/error/error.service';
 import {
     CartItemCreateInput,
     CartItemUpdateInput,
@@ -26,14 +27,21 @@ import { Roles } from 'src/core/common/roles.decorator';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('cart')
 export class CartController {
-    constructor(private cartService: CartService) {}
+    constructor(
+        private cartService: CartService,
+        private errorService: ErrorService,
+    ) {}
 
     @Get(':cartId')
     @Roles(Role.BUYER, Role.ADMIN)
     async getCartItems(
         @Param('cartId', new ParseIntPipe()) cartId: number,
     ): Promise<any> {
-        return await this.cartService.getCartItems(cartId);
+        try {
+            return await this.cartService.getCartItems(cartId);
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Post('')
@@ -43,7 +51,14 @@ export class CartController {
         @UploadedFile() file,
         @Body() cartItemCreateInput: CartItemCreateInput,
     ): Promise<any> {
-        return await this.cartService.addCartItem(cartItemCreateInput, file);
+        try {
+            return await this.cartService.addCartItem(
+                cartItemCreateInput,
+                file,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Put(':cartItemId')
@@ -54,11 +69,15 @@ export class CartController {
         @Param('cartItemId', new ParseIntPipe()) cartItemId: number,
         @Body('data', ParseJsonPipe) cartItemUpdateInput: CartItemUpdateInput,
     ): Promise<any> {
-        return await this.cartService.updateCartItem(
-            cartItemId,
-            cartItemUpdateInput,
-            file,
-        );
+        try {
+            return await this.cartService.updateCartItem(
+                cartItemId,
+                cartItemUpdateInput,
+                file,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Delete(':cartId/:cartItemId')
@@ -67,6 +86,10 @@ export class CartController {
         @Param('cartId', new ParseIntPipe()) cartId: number,
         @Param('cartItemId', new ParseIntPipe()) cartItemId: number,
     ): Promise<any> {
-        return await this.cartService.removeCartItem(cartId, cartItemId);
+        try {
+            return await this.cartService.removeCartItem(cartId, cartItemId);
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 }

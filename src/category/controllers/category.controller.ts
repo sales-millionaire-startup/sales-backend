@@ -11,6 +11,7 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from '../services/category.service';
+import { ErrorService } from 'src/core/error/error.service';
 import {
     CategoryCreateInput,
     CategoryUpdateInput,
@@ -23,18 +24,29 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('category')
 export class CategoryController {
-    constructor(private categoryService: CategoryService) {}
+    constructor(
+        private categoryService: CategoryService,
+        private errorService: ErrorService,
+    ) {}
 
     @Get('')
     @Roles(Role.BUYER, Role.ADMIN)
     async getAllParents(): Promise<any> {
-        return await this.categoryService.getAllParentCategory();
+        try {
+            return await this.categoryService.getAllParentCategory();
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Get('flattend')
     @Roles(Role.ADMIN)
     async getFlattened(): Promise<any> {
-        return await this.categoryService.getAllFlattened();
+        try {
+            return await this.categoryService.getAllFlattened();
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Get(':categoryId')
@@ -43,10 +55,14 @@ export class CategoryController {
         @Param('categoryId', new ParseIntPipe()) categoryId: number,
         @Query('depth') depth: number,
     ): Promise<any> {
-        return await this.categoryService.getParentCategoryWithChildren(
-            categoryId,
-            +depth,
-        );
+        try {
+            return await this.categoryService.getParentCategoryWithChildren(
+                categoryId,
+                +depth,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Post('')
@@ -54,9 +70,13 @@ export class CategoryController {
     async createCategory(
         @Body() categoryCreateInput: CategoryCreateInput,
     ): Promise<any> {
-        return await this.categoryService.createSingleCategory(
-            categoryCreateInput,
-        );
+        try {
+            return await this.categoryService.createSingleCategory(
+                categoryCreateInput,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Put(':categoryId')
@@ -65,10 +85,14 @@ export class CategoryController {
         @Param('categoryId', new ParseIntPipe()) categoryId,
         @Body() categoryUpdateInput: CategoryUpdateInput,
     ): Promise<any> {
-        return await this.categoryService.updateSingleCategory(
-            categoryUpdateInput,
-            categoryId,
-        );
+        try {
+            return await this.categoryService.updateSingleCategory(
+                categoryUpdateInput,
+                categoryId,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Delete(':categoryId')
@@ -76,6 +100,10 @@ export class CategoryController {
     async deleteModule(
         @Param('categoryId', new ParseIntPipe()) categoryId,
     ): Promise<any> {
-        return await this.categoryService.deleteCategory(categoryId);
+        try {
+            return await this.categoryService.deleteCategory(categoryId);
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 }

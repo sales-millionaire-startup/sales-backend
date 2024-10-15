@@ -22,18 +22,26 @@ import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/core/common/roles.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Roles } from 'src/core/common/roles.decorator';
+import { ErrorService } from 'src/core/error/error.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('product')
 export class ProductController {
-    constructor(private productService: ProductService) {}
+    constructor(
+        private productService: ProductService,
+        private errorService: ErrorService,
+    ) {}
 
     @Get(':categoryId')
     @Roles(Role.BUYER, Role.ADMIN)
     async getCategoryProducts(
         @Param('categoryId', new ParseIntPipe()) categoryId: number,
     ): Promise<any> {
-        return await this.productService.getCategoryProducts(categoryId);
+        try {
+            return await this.productService.getCategoryProducts(categoryId);
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Post('')
@@ -43,10 +51,14 @@ export class ProductController {
         @UploadedFile() file,
         @Body('data', ParseJsonPipe) productCreateInput: ProductCreateInput,
     ): Promise<any> {
-        return await this.productService.createSingleProduct(
-            productCreateInput,
-            file,
-        );
+        try {
+            return await this.productService.createSingleProduct(
+                productCreateInput,
+                file,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Put(':productId')
@@ -57,11 +69,15 @@ export class ProductController {
         @Param('productId', new ParseIntPipe()) productId: number,
         @Body('data', ParseJsonPipe) productUpdateInput: ProductUpdateInput,
     ): Promise<any> {
-        return await this.productService.updateSingleProduct(
-            productUpdateInput,
-            productId,
-            file,
-        );
+        try {
+            return await this.productService.updateSingleProduct(
+                productUpdateInput,
+                productId,
+                file,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 
     @Delete(':productId')
@@ -69,6 +85,10 @@ export class ProductController {
     async deleteProduct(
         @Param('productId', new ParseIntPipe()) productId: number,
     ): Promise<any> {
-        return await this.productService.deleteProduct(productId);
+        try {
+            return await this.productService.deleteProduct(productId);
+        } catch (error) {
+            return await this.errorService.handleError(error);
+        }
     }
 }

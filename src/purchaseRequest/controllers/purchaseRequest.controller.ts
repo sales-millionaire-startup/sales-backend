@@ -14,22 +14,44 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { PurchaseRequestUpdateInput } from '../models/purchaseRequest.models';
+import { ErrorService } from 'src/core/error/error.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('purchaseRequest')
 export class PurchaseRequestController {
-    constructor(private purchaseRequestService: PurchaseRequestService) {}
+    constructor(
+        private purchaseRequestService: PurchaseRequestService,
+        private errorService: ErrorService,
+    ) {}
 
     @Get('')
     @Roles(Role.ADMIN, Role.BUYER)
     async getPurchaseRequests(@CurrentUser() user: User): Promise<any> {
-        return await this.purchaseRequestService.getPurchaseRequests(user.id);
+        try {
+            return await this.purchaseRequestService.getPurchaseRequests(
+                user.id,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(
+                error,
+                'Failed to get purchase requests',
+            );
+        }
     }
 
     @Post('')
     @Roles(Role.ADMIN, Role.BUYER)
     async createPurchaseRequest(@CurrentUser() user: User): Promise<any> {
-        return await this.purchaseRequestService.createPurchaseRequest(user.id);
+        try {
+            return await this.purchaseRequestService.createPurchaseRequest(
+                user.id,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(
+                error,
+                'Failed to create purchase request',
+            );
+        }
     }
 
     @Put(':id')
@@ -38,9 +60,16 @@ export class PurchaseRequestController {
         @Param('id') id: number,
         @Body() purchaseRequestUpdateInput: PurchaseRequestUpdateInput,
     ): Promise<any> {
-        return await this.purchaseRequestService.updatePurchaseRequest(
-            id,
-            purchaseRequestUpdateInput,
-        );
+        try {
+            return await this.purchaseRequestService.updatePurchaseRequest(
+                id,
+                purchaseRequestUpdateInput,
+            );
+        } catch (error) {
+            return await this.errorService.handleError(
+                error,
+                'Failed to update purchase request',
+            );
+        }
     }
 }
