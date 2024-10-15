@@ -1,24 +1,30 @@
 /* eslint-disable indent */
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UnitElementCreateInput {
+    @IsOptional()
     @IsString()
-    name_en?: string;
+    name_en?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_ge?: string;
+    name_ge?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_tr?: string;
+    name_tr?: string | null;
 }
 
 export class UnitElementUpdateInput {
+    @IsOptional()
     @IsString()
-    name_en?: string;
+    name_en?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_ge?: string;
+    name_ge?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_tr?: string;
+    name_tr?: string | null;
 }

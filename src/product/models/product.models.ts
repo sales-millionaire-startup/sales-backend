@@ -1,55 +1,74 @@
 /* eslint-disable indent */
-import { IsString, IsNumber, IsArray, IsBoolean } from 'class-validator';
+import {
+    IsString,
+    IsNumber,
+    IsArray,
+    IsBoolean,
+    IsOptional,
+} from 'class-validator';
 
 export class ProductCreateInput {
+    @IsOptional()
     @IsString()
-    name_en?: string;
+    name_en?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_ge?: string;
+    name_ge?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_tr?: string;
+    name_tr?: string | null;
 
     @IsNumber()
     categoryId: number;
 
+    @IsOptional()
     @IsArray()
     specifications?: Array<SpecificationInput>;
 }
 
 export class ProductUpdateInput {
+    @IsOptional()
     @IsString()
-    name_en?: string;
+    name_en?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_ge?: string;
+    name_ge?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_tr?: string;
+    name_tr?: string | null;
 
     @IsNumber()
     categoryId: number;
 
+    @IsOptional()
     @IsString()
-    imageName?: string;
+    imageName?: string | null;
 
+    @IsOptional()
     @IsArray()
     specifications?: Array<SpecificationInput>;
 }
 
 export class SpecificationInput {
+    @IsOptional()
     @IsNumber()
-    id?: number;
+    id?: number | null;
 
+    @IsOptional()
     @IsString()
-    name_en?: string;
+    name_en?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_ge?: string;
+    name_ge?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_tr?: string;
+    name_tr?: string | null;
 
     @IsNumber()
     productId: number;
@@ -57,6 +76,7 @@ export class SpecificationInput {
     @IsNumber()
     unitElementId: number;
 
+    @IsOptional()
     @IsBoolean()
-    isSplitable?: boolean;
+    isSplitable?: boolean | null;
 }

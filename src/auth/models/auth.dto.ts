@@ -21,5 +21,5 @@ export class AuthDto {
 
     @IsOptional()
     @IsEnum(Role)
-    role?: Role; // Role is optional and can be set by admins
+    role?: Role | null; // Role is optional and can be set by admins
 }

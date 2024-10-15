@@ -1,15 +1,18 @@
 /* eslint-disable indent */
-import { IsArray, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class SellerInfoInput {
+    @IsOptional()
     @IsString()
-    companyName?: string;
+    companyName?: string | null;
 
+    @IsOptional()
     @IsString()
-    address?: string;
+    address?: string | null;
 
+    @IsOptional()
     @IsString()
-    city?: string;
+    city?: string | null;
 }
 
 export class SellerCategoryInput {

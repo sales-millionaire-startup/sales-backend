@@ -1,33 +1,39 @@
 /* eslint-disable indent */
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CategoryCreateInput {
+    @IsOptional()
     @IsString()
-    name_en?: string;
+    name_en?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_ge?: string;
+    name_ge?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_tr?: string;
+    name_tr?: string | null;
 
     @IsNumber()
-    depth?: number;
+    depth?: number | null;
 
     @IsNumber()
-    parentCategoryId?: number;
+    parentCategoryId?: number | null;
 
     @IsNumber()
-    parentMostCategoryId?: number;
+    parentMostCategoryId?: number | null;
 }
 
 export class CategoryUpdateInput {
+    @IsOptional()
     @IsString()
-    name_en?: string;
+    name_en?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_ge?: string;
+    name_ge?: string | null;
 
+    @IsOptional()
     @IsString()
-    name_tr?: string;
+    name_tr?: string | null;
 }

@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import { IsArray, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CartItemCreateInput {
     @IsNumber()
@@ -8,6 +8,7 @@ export class CartItemCreateInput {
     @IsNumber()
     productId: number;
 
+    @IsOptional()
     @IsArray()
     cartItemValues?: Array<CartItemValue>;
 }
@@ -19,9 +20,11 @@ export class CartItemUpdateInput {
     @IsNumber()
     productId: number;
 
+    @IsOptional()
     @IsString()
     imageName?: string;
 
+    @IsOptional()
     @IsArray()
     cartItemValues?: Array<CartItemValue>;
 }
