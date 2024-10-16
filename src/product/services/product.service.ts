@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
@@ -81,7 +82,6 @@ export class ProductService {
         }
 
         return await this.prisma.$transaction(async (tx) => {
-            // Update the product with the given productId
             const updatedProduct = await tx.product.update({
                 where: {
                     id: productId,
@@ -103,50 +103,47 @@ export class ProductService {
                 },
             });
 
-            // Update or create specifications based on the input and include the unit details
-            const updatedSpecifications = [];
+            // Upsert or create specifications
+            const specificationPromises = productUpdateInput.specifications.map(
+                (spec, index) =>
+                    spec.id
+                        ? tx.specification.update({
+                              where: { id: spec.id },
+                              data: {
+                                  name_en: spec.name_en,
+                                  name_ge: spec.name_ge,
+                                  name_tr: spec.name_tr,
+                                  unitElementId: spec.unitElementId,
+                                  isSplitable: spec.isSplitable,
+                                  hierarchyInd: index,
+                              },
+                          })
+                        : tx.specification.create({
+                              data: {
+                                  name_en: spec.name_en,
+                                  name_ge: spec.name_ge,
+                                  name_tr: spec.name_tr,
+                                  productId: updatedProduct.id,
+                                  unitElementId: spec.unitElementId,
+                                  isSplitable: spec.isSplitable,
+                                  hierarchyInd: index,
+                              },
+                          }),
+            );
 
-            for (const spec of productUpdateInput.specifications) {
-                if (spec.id) {
-                    // Update existing specification
-                    const updatedSpec = await tx.specification.update({
-                        where: {
-                            id: spec.id,
-                        },
-                        data: {
-                            name_en: spec.name_en,
-                            name_ge: spec.name_ge,
-                            name_tr: spec.name_tr,
-                            unitElementId: spec.unitElementId,
-                            isSplitable: spec.isSplitable,
-                            hierarchyInd:
-                                productUpdateInput.specifications.indexOf(spec),
-                        },
-                        include: {
-                            unitElement: true, // Include the unit in the updated specification
-                        },
-                    });
-                    updatedSpecifications.push(updatedSpec);
-                } else {
-                    // Create a new specification
-                    const newSpec = await tx.specification.create({
-                        data: {
-                            name_en: spec.name_en,
-                            name_ge: spec.name_ge,
-                            name_tr: spec.name_tr,
-                            productId: updatedProduct.id,
-                            unitElementId: spec.unitElementId,
-                            isSplitable: spec.isSplitable,
-                            hierarchyInd:
-                                productUpdateInput.specifications.indexOf(spec),
-                        },
-                        include: {
-                            unitElement: true, // Include the unit in the new specification
-                        },
-                    });
-                    updatedSpecifications.push(newSpec);
-                }
-            }
+            await Promise.all(specificationPromises);
+
+            // Remove specifications not included in the update
+            await tx.specification.deleteMany({
+                where: {
+                    productId: productId,
+                    id: {
+                        notIn: productUpdateInput.specifications
+                            .map((spec) => spec.id)
+                            .filter(Boolean),
+                    },
+                },
+            });
 
             return await this.getProductsTree(tx, updatedProduct);
         });
