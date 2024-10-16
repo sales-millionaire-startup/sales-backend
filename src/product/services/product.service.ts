@@ -103,56 +103,78 @@ export class ProductService {
                 },
             });
 
-            // Upsert or create specifications
-            const specificationPromises = productUpdateInput.specifications.map(
-                (spec, index) =>
-                    spec.id
-                        ? tx.specification.update({
-                              where: { id: spec.id },
-                              data: {
-                                  name_en: spec.name_en,
-                                  name_ge: spec.name_ge,
-                                  name_tr: spec.name_tr,
-                                  unitElementId: spec.unitElementId,
-                                  isSplitable: spec.isSplitable,
-                                  hierarchyInd: index,
-                              },
-                          })
-                        : tx.specification.create({
-                              data: {
-                                  name_en: spec.name_en,
-                                  name_ge: spec.name_ge,
-                                  name_tr: spec.name_tr,
-                                  productId: updatedProduct.id,
-                                  unitElementId: spec.unitElementId,
-                                  isSplitable: spec.isSplitable,
-                                  hierarchyInd: index,
-                              },
-                          }),
-            );
+            if (productUpdateInput.specifications.length > 0) {
+                const specificationPromises =
+                    productUpdateInput.specifications.map((spec, index) =>
+                        spec.id
+                            ? tx.specification.update({
+                                  where: { id: spec.id },
+                                  data: {
+                                      name_en: spec.name_en,
+                                      name_ge: spec.name_ge,
+                                      name_tr: spec.name_tr,
+                                      unitElementId: spec.unitElementId,
+                                      isSplitable: spec.isSplitable,
+                                      hierarchyInd: index,
+                                  },
+                              })
+                            : tx.specification.create({
+                                  data: {
+                                      name_en: spec.name_en,
+                                      name_ge: spec.name_ge,
+                                      name_tr: spec.name_tr,
+                                      productId: updatedProduct.id,
+                                      unitElementId: spec.unitElementId,
+                                      isSplitable: spec.isSplitable,
+                                      hierarchyInd: index,
+                                  },
+                              }),
+                    );
 
-            const specIdsToKeep = productUpdateInput.specifications
-                .map((spec) => spec.id)
-                .filter(Boolean);
+                const specIdsToKeep = productUpdateInput.specifications
+                    .map((spec) => spec.id)
+                    .filter(Boolean);
 
-            const deleteSpecificationsPromise =
-                specIdsToKeep.length > 0
-                    ? tx.specification.deleteMany({
-                          where: {
-                              productId: productId,
-                              id: {
-                                  notIn: specIdsToKeep,
-                              },
-                          },
-                      })
-                    : Promise.resolve(); // Do nothing if specIdsToKeep is empty
+                const deleteSpecificationsPromise =
+                    specIdsToKeep.length > 0
+                        ? this.deleteSpecifications(
+                              tx,
+                              productUpdateInput.specifications,
+                              productId,
+                              specIdsToKeep,
+                          )
+                        : Promise.resolve();
 
-            await Promise.all([
-                ...specificationPromises,
-                deleteSpecificationsPromise,
-            ]);
+                await Promise.all([
+                    ...specificationPromises,
+                    deleteSpecificationsPromise,
+                ]);
+            } else {
+                await this.deleteSpecifications(
+                    tx,
+                    productUpdateInput.specifications,
+                    productId,
+                    [],
+                );
+            }
 
             return await this.getProductsTree(tx, updatedProduct);
+        });
+    }
+
+    private async deleteSpecifications(
+        tx,
+        specifications,
+        productId: number,
+        specIdsToKeep: number[],
+    ) {
+        return tx.specification.deleteMany({
+            where: {
+                productId: productId,
+                id: {
+                    notIn: specIdsToKeep,
+                },
+            },
         });
     }
 
