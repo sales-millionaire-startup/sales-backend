@@ -131,19 +131,26 @@ export class ProductService {
                           }),
             );
 
-            await Promise.all(specificationPromises);
+            const specIdsToKeep = productUpdateInput.specifications
+                .map((spec) => spec.id)
+                .filter(Boolean);
 
-            // Remove specifications not included in the update
-            await tx.specification.deleteMany({
-                where: {
-                    productId: productId,
-                    id: {
-                        notIn: productUpdateInput.specifications
-                            .map((spec) => spec.id)
-                            .filter(Boolean),
-                    },
-                },
-            });
+            const deleteSpecificationsPromise =
+                specIdsToKeep.length > 0
+                    ? tx.specification.deleteMany({
+                          where: {
+                              productId: productId,
+                              id: {
+                                  notIn: specIdsToKeep,
+                              },
+                          },
+                      })
+                    : Promise.resolve(); // Do nothing if specIdsToKeep is empty
+
+            await Promise.all([
+                ...specificationPromises,
+                deleteSpecificationsPromise,
+            ]);
 
             return await this.getProductsTree(tx, updatedProduct);
         });
