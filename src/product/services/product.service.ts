@@ -134,7 +134,7 @@ export class ProductService {
                             name_en: spec.name_en,
                             name_ge: spec.name_ge,
                             name_tr: spec.name_tr,
-                            productId: productId,
+                            productId: updatedProduct.id,
                             unitElementId: spec.unitElementId,
                             isSplitable: spec.isSplitable,
                             hierarchyInd:

@@ -19,7 +19,7 @@ import { ErrorService } from 'src/core/error/error.service';
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
                 secret: configService.get<string>('JWT_SECRET'),
-                signOptions: { expiresIn: '2d' },
+                signOptions: { expiresIn: '1w' },
             }),
         }),
         ConfigModule, // Import ConfigModule to handle environment variables
